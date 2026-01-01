@@ -1,9 +1,46 @@
 package main
 
-import "github.com/gofiber/fiber"
+import (
+	"fmt"
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
+
+	"github.com/joho/godotenv"
+	"github.com/rajan-marasini/EasyBuy/server/internal/app"
+	"github.com/rajan-marasini/EasyBuy/server/internal/config"
+)
+
+func init() {
+	if err := godotenv.Load(); err != nil {
+		log.Fatal("[Error]:", err.Error())
+	}
+}
 
 func main() {
-	app := fiber.New()
+	cfg := config.Load()
 
-	app.Listen(":8000")
+	quitChan := make(chan os.Signal, 1)
+	signal.Notify(quitChan, os.Interrupt, syscall.SIGTERM)
+
+	app := app.NewFiberApp(cfg)
+
+	go func() {
+		log.Println("Server running on port", cfg.PORT)
+		if err := app.Listen(fmt.Sprintf(":%s", cfg.PORT)); err != nil {
+			log.Fatal("[Error]:", err.Error())
+		}
+	}()
+
+	handleGracefulShutdown(app, quitChan)
+}
+
+func handleGracefulShutdown(app *app.AppWrapper, quitChan chan os.Signal) {
+	<-quitChan
+	log.Println("Shutting down server...")
+	if err := app.Shutdown(); err != nil {
+		log.Println("Error shutting the server")
+	}
+	log.Println("Server shut down gracefully")
 }
