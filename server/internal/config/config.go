@@ -15,6 +15,7 @@ type Config struct {
 	DATABASE_USER     string `env:"DATABASE_USER" envDefault:"postgres"`
 	DATABASE_PASSWORD string `env:"DATABASE_PASSWORD" envDefault:"postgres"`
 	DATABASE_SSLMODE  string `env:"DATABASE_SSL" envDefault:"disable"`
+	JWT_SECRET        string `env:"JWT_SECRET" envDefault:"secret"`
 }
 
 func Load() *Config {

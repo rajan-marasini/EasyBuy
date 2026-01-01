@@ -8,10 +8,11 @@ import (
 
 func RegisterAuthRoute(router fiber.Router, cfg *config.Config, db *gorm.DB) {
 	repo := NewRepository(db)
-	serv := NewService(repo)
-	handler := NewHandler(serv)
+	serv := NewService(repo, cfg)
+	handler := NewHandler(serv, cfg)
 
 	router.Get("/", handler.CheckHealth)
 	router.Post("/register", handler.RegisterUser)
+	router.Post("/login", handler.LoginUser)
 
 }

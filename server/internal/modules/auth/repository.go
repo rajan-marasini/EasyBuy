@@ -1,12 +1,15 @@
 package auth
 
 import (
+	"time"
+
 	"gorm.io/gorm"
 )
 
 type Repository interface {
 	Create(UserRegisterRequest) (*User, error)
-	FindByEmail(string) (*User, error)
+	FindByEmail(email string) (*User, error)
+	UpdateLoginTime(id string) error
 }
 
 type repository struct {
@@ -39,8 +42,11 @@ func (r *repository) FindByEmail(email string) (*User, error) {
 			return nil, nil
 		}
 		return nil, err
-
 	}
 
 	return &user, nil
+}
+
+func (r *repository) UpdateLoginTime(id string) error {
+	return r.db.Model(&User{}).Where("id=?", id).Update("last_login_at", time.Now()).Error
 }
