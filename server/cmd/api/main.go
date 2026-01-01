@@ -10,6 +10,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/rajan-marasini/EasyBuy/server/internal/app"
 	"github.com/rajan-marasini/EasyBuy/server/internal/config"
+	"github.com/rajan-marasini/EasyBuy/server/internal/database"
 )
 
 func init() {
@@ -24,7 +25,9 @@ func main() {
 	quitChan := make(chan os.Signal, 1)
 	signal.Notify(quitChan, os.Interrupt, syscall.SIGTERM)
 
-	app := app.NewFiberApp(cfg)
+	db := database.Connect(cfg)
+
+	app := app.NewFiberApp(cfg, db)
 
 	go func() {
 		log.Println("Server running on port", cfg.PORT)
