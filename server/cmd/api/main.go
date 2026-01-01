@@ -11,6 +11,7 @@ import (
 	"github.com/rajan-marasini/EasyBuy/server/internal/app"
 	"github.com/rajan-marasini/EasyBuy/server/internal/config"
 	"github.com/rajan-marasini/EasyBuy/server/internal/database"
+	"github.com/rajan-marasini/EasyBuy/server/internal/routes"
 )
 
 func init() {
@@ -26,8 +27,11 @@ func main() {
 	signal.Notify(quitChan, os.Interrupt, syscall.SIGTERM)
 
 	db := database.Connect(cfg)
+	database.Migrate(db)
 
 	app := app.NewFiberApp(cfg, db)
+
+	routes.RegisterRoutes(app)
 
 	go func() {
 		log.Println("Server running on port", cfg.PORT)
