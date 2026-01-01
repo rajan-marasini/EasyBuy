@@ -6,6 +6,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/rajan-marasini/EasyBuy/server/internal/config"
+	"github.com/rajan-marasini/EasyBuy/server/internal/errors"
 	"gorm.io/gorm"
 )
 
@@ -33,13 +34,18 @@ func NewFiberApp(cfg *config.Config, db *gorm.DB) *AppWrapper {
 
 func errorHandler(c *fiber.Ctx, err error) error {
 	code := http.StatusInternalServerError
+	var errorMsg interface{} = err.Error()
 
-	if er, ok := err.(*fiber.Error); ok {
-		code = er.Code
+	if e, ok := err.(*errors.AppError); ok {
+		code = e.Code
+		errorMsg = e.Message
+	} else if e, ok := err.(*fiber.Error); ok {
+		code = e.Code
+		errorMsg = e.Message
 	}
 
 	return c.Status(code).JSON(fiber.Map{
 		"success": false,
-		"message": err.Error(),
+		"message": errorMsg,
 	})
 }
