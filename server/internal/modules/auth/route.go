@@ -7,7 +7,10 @@ import (
 )
 
 func RegisterAuthRoute(router fiber.Router, cfg *config.Config, db *gorm.DB) {
-	router.Get("/", func(c *fiber.Ctx) error {
-		return c.JSON("auth route working fine")
-	})
+	repo := NewRepository(db)
+	serv := NewService(repo)
+	controller := NewController(serv)
+
+	router.Get("/", controller.CheckHealth)
+
 }
