@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/rajan-marasini/EasyBuy/server/internal/models"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
@@ -14,11 +15,12 @@ type Repository interface {
 }
 
 type repository struct {
-	db *gorm.DB
+	db    *gorm.DB
+	redis *redis.Client
 }
 
-func NewRepository(db *gorm.DB) Repository {
-	return &repository{db}
+func NewRepository(db *gorm.DB, rdb *redis.Client) Repository {
+	return &repository{db, rdb}
 }
 
 func (r *repository) Create(req UserRegisterRequest) (*models.User, error) {

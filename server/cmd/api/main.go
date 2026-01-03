@@ -28,8 +28,9 @@ func main() {
 
 	db := database.Connect(cfg)
 	database.Migrate(db)
+	rdb := database.ConnectRedis(cfg)
 
-	app := app.NewFiberApp(cfg, db)
+	app := app.NewFiberApp(cfg, db, rdb)
 
 	routes.RegisterRoutes(app)
 

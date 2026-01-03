@@ -10,5 +10,5 @@ func RegisterRoutes(app *app.AppWrapper) {
 	v1 := api.Group("/v1")
 
 	authGroup := v1.Group("/auth")
-	auth.RegisterAuthRoute(authGroup, app.Config, app.DB)
+	auth.RegisterAuthRoute(authGroup, app)
 }
