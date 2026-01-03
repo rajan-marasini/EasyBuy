@@ -6,25 +6,27 @@ import (
 	"github.com/rajan-marasini/EasyBuy/server/internal/config"
 )
 
-type Handler struct {
+type Handler interface {
+	RegisterUser(c *fiber.Ctx) error
+	LoginUser(c *fiber.Ctx) error
+	LogoutUser(c *fiber.Ctx) error
+}
+
+type handler struct {
 	serv      Service
 	validator *validator.Validate
 	cfg       *config.Config
 }
 
-func NewHandler(serv Service, cfg *config.Config) *Handler {
-	return &Handler{
+func NewHandler(serv Service, cfg *config.Config) Handler {
+	return &handler{
 		serv:      serv,
 		cfg:       cfg,
 		validator: validator.New(),
 	}
 }
 
-func (h *Handler) CheckHealth(c *fiber.Ctx) error {
-	return c.Status(200).JSON("Auth health fine")
-}
-
-func (h *Handler) RegisterUser(c *fiber.Ctx) error {
+func (h *handler) RegisterUser(c *fiber.Ctx) error {
 
 	var req UserRegisterRequest
 
@@ -48,7 +50,7 @@ func (h *Handler) RegisterUser(c *fiber.Ctx) error {
 	})
 }
 
-func (h *Handler) LoginUser(c *fiber.Ctx) error {
+func (h *handler) LoginUser(c *fiber.Ctx) error {
 	var req UserLoginRequest
 	if err := c.BodyParser(&req); err != nil {
 		return fiber.NewError(400, "Bad Request")
@@ -78,7 +80,7 @@ func (h *Handler) LoginUser(c *fiber.Ctx) error {
 	})
 }
 
-func (h *Handler) LogoutUser(c *fiber.Ctx) error {
+func (h *handler) LogoutUser(c *fiber.Ctx) error {
 	c.Cookie(&fiber.Cookie{
 		Name:     "token",
 		Value:    "",
