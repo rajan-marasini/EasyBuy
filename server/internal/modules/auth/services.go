@@ -3,6 +3,7 @@ package auth
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/rajan-marasini/EasyBuy/server/internal/config"
+	"github.com/rajan-marasini/EasyBuy/server/internal/models"
 	"github.com/rajan-marasini/EasyBuy/server/internal/utils"
 )
 
@@ -34,18 +35,22 @@ func (s *service) RegisterUser(req UserRegisterRequest) (*UserRegisterResponse, 
 	if err != nil {
 		return nil, err
 	}
-	req.Password = hashedPassword
 
-	user, err := s.repo.Create(req)
+	user := &models.User{
+		Name:     req.Name,
+		Email:    req.Email,
+		Password: hashedPassword,
+	}
+	createdUser, err := s.repo.Create(user)
 	if err != nil {
 		return nil, err
 	}
 
 	return &UserRegisterResponse{
-		ID:    user.ID.String(),
-		Name:  user.Name,
-		Email: user.Email,
-		Role:  user.Role,
+		ID:    createdUser.ID.String(),
+		Name:  createdUser.Name,
+		Email: createdUser.Email,
+		Role:  createdUser.Role,
 	}, nil
 }
 

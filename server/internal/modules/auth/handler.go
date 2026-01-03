@@ -1,8 +1,6 @@
 package auth
 
 import (
-	"fmt"
-
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/rajan-marasini/EasyBuy/server/internal/config"
@@ -81,8 +79,6 @@ func (h *Handler) LoginUser(c *fiber.Ctx) error {
 }
 
 func (h *Handler) LogoutUser(c *fiber.Ctx) error {
-	fmt.Println("Logging out")
-
 	c.Cookie(&fiber.Cookie{
 		Name:     "token",
 		Value:    "",
