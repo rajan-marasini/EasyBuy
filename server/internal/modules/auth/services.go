@@ -28,7 +28,7 @@ func (s *service) RegisterUser(req UserRegisterRequest) (*UserRegisterResponse, 
 	}
 
 	if userAlreadyExist != nil {
-		return nil, fiber.NewError(200, "User already exist")
+		return nil, fiber.NewError(400, "User already exist")
 	}
 
 	hashedPassword, err := utils.HashPassword(req.Password)
@@ -61,11 +61,11 @@ func (s *service) LoginUser(req UserLoginRequest) (*UserLoginResponse, error) {
 	}
 
 	if user == nil {
-		return nil, fiber.NewError(200, "Invalid credentials")
+		return nil, fiber.NewError(400, "Invalid credentials")
 	}
 
 	if !utils.CheckPasswordHash(req.Password, user.Password) {
-		return nil, fiber.NewError(200, "Invalid credentials")
+		return nil, fiber.NewError(400, "Invalid credentials")
 	}
 
 	token, err := utils.GenerateToken(user.ID.String(), user.Email, user.Role, s.cfg.JWT_SECRET)
