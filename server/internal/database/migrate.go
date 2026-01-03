@@ -3,7 +3,7 @@ package database
 import (
 	"log"
 
-	"github.com/rajan-marasini/EasyBuy/server/internal/modules/auth"
+	"github.com/rajan-marasini/EasyBuy/server/internal/models"
 	"gorm.io/gorm"
 )
 
@@ -11,7 +11,7 @@ func Migrate(db *gorm.DB) {
 	log.Println("Starting migration ....")
 
 	err := db.AutoMigrate(
-		&auth.User{},
+		&models.User{},
 	)
 
 	if err != nil {

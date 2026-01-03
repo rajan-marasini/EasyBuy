@@ -1,4 +1,4 @@
-package auth
+package models
 
 import (
 	"time"
@@ -16,7 +16,7 @@ type User struct {
 	Phone string `gorm:"size:20" json:"phone"`
 
 	// Authentication
-	Password   string `gorm:"not null" json:"-"`
+	Password   string `gorm:"not null" json:"password"`
 	IsVerified bool   `gorm:"default:false" json:"is_verified"`
 
 	EmailVerifiedAt        *time.Time `json:"email_verified_at,omitempty"`

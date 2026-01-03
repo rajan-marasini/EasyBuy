@@ -1,19 +1,20 @@
 package auth
 
 import (
+	"fmt"
+
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/rajan-marasini/EasyBuy/server/internal/config"
-	"github.com/rajan-marasini/EasyBuy/server/internal/errors"
 )
 
 type Handler struct {
-	serv      *Service
+	serv      Service
 	validator *validator.Validate
 	cfg       *config.Config
 }
 
-func NewHandler(serv *Service, cfg *config.Config) *Handler {
+func NewHandler(serv Service, cfg *config.Config) *Handler {
 	return &Handler{
 		serv:      serv,
 		cfg:       cfg,
@@ -30,11 +31,11 @@ func (h *Handler) RegisterUser(c *fiber.Ctx) error {
 	var req UserRegisterRequest
 
 	if err := c.BodyParser(&req); err != nil {
-		return errors.BadRequest("Invalid body")
+		return fiber.NewError(400, err.Error())
 	}
 
 	if err := h.validator.Struct(req); err != nil {
-		return errors.BadRequest(err.Error())
+		return fiber.NewError(400, err.Error())
 	}
 
 	user, err := h.serv.RegisterUser(req)
@@ -52,11 +53,11 @@ func (h *Handler) RegisterUser(c *fiber.Ctx) error {
 func (h *Handler) LoginUser(c *fiber.Ctx) error {
 	var req UserLoginRequest
 	if err := c.BodyParser(&req); err != nil {
-		return errors.BadRequest("Invalid body")
+		return fiber.NewError(400, "Bad Request")
 	}
 
 	if err := h.validator.Struct(req); err != nil {
-		return errors.BadRequest(err.Error())
+		return fiber.NewError(400, "Bad Request")
 	}
 
 	res, err := h.serv.LoginUser(req)
@@ -76,5 +77,22 @@ func (h *Handler) LoginUser(c *fiber.Ctx) error {
 		"success": true,
 		"message": "User login successful",
 		"data":    res,
+	})
+}
+
+func (h *Handler) LogoutUser(c *fiber.Ctx) error {
+	fmt.Println("Logging out")
+
+	c.Cookie(&fiber.Cookie{
+		Name:     "token",
+		Value:    "",
+		HTTPOnly: true,
+		Secure:   false,
+		SameSite: "lax",
+	})
+
+	return c.Status(200).JSON(fiber.Map{
+		"success": true,
+		"message": "User logged out successfully",
 	})
 }

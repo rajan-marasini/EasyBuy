@@ -3,12 +3,13 @@ package auth
 import (
 	"time"
 
+	"github.com/rajan-marasini/EasyBuy/server/internal/models"
 	"gorm.io/gorm"
 )
 
 type Repository interface {
-	Create(UserRegisterRequest) (*User, error)
-	FindByEmail(email string) (*User, error)
+	Create(UserRegisterRequest) (*models.User, error)
+	FindByEmail(email string) (*models.User, error)
 	UpdateLoginTime(id string) error
 }
 
@@ -20,8 +21,8 @@ func NewRepository(db *gorm.DB) Repository {
 	return &repository{db}
 }
 
-func (r *repository) Create(req UserRegisterRequest) (*User, error) {
-	user := User{
+func (r *repository) Create(req UserRegisterRequest) (*models.User, error) {
+	user := models.User{
 		Name:     req.Name,
 		Email:    req.Email,
 		Password: req.Password,
@@ -34,8 +35,8 @@ func (r *repository) Create(req UserRegisterRequest) (*User, error) {
 	return &user, nil
 }
 
-func (r *repository) FindByEmail(email string) (*User, error) {
-	var user User
+func (r *repository) FindByEmail(email string) (*models.User, error) {
+	var user models.User
 
 	if err := r.db.Where("email=?", email).First(&user).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -48,5 +49,5 @@ func (r *repository) FindByEmail(email string) (*User, error) {
 }
 
 func (r *repository) UpdateLoginTime(id string) error {
-	return r.db.Model(&User{}).Where("id=?", id).Update("last_login_at", time.Now()).Error
+	return r.db.Model(&models.User{}).Where("id=?", id).Update("last_login_at", time.Now()).Error
 }

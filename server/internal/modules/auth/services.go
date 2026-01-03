@@ -1,28 +1,33 @@
 package auth
 
 import (
+	"github.com/gofiber/fiber/v2"
 	"github.com/rajan-marasini/EasyBuy/server/internal/config"
-	"github.com/rajan-marasini/EasyBuy/server/internal/errors"
 	"github.com/rajan-marasini/EasyBuy/server/internal/utils"
 )
 
-type Service struct {
+type Service interface {
+	RegisterUser(req UserRegisterRequest) (*UserRegisterResponse, error)
+	LoginUser(req UserLoginRequest) (*UserLoginResponse, error)
+}
+
+type service struct {
 	repo Repository
 	cfg  *config.Config
 }
 
-func NewService(repo Repository, cfg *config.Config) *Service {
-	return &Service{repo, cfg}
+func NewService(repo Repository, cfg *config.Config) Service {
+	return &service{repo, cfg}
 }
 
-func (s *Service) RegisterUser(req UserRegisterRequest) (*UserRegisterResponse, error) {
+func (s *service) RegisterUser(req UserRegisterRequest) (*UserRegisterResponse, error) {
 	userAlreadyExist, err := s.repo.FindByEmail(req.Email)
 	if err != nil {
 		return nil, err
 	}
 
 	if userAlreadyExist != nil {
-		return nil, errors.BadRequest("User already exists")
+		return nil, fiber.NewError(200, "User already exist")
 	}
 
 	hashedPassword, err := utils.HashPassword(req.Password)
@@ -44,18 +49,18 @@ func (s *Service) RegisterUser(req UserRegisterRequest) (*UserRegisterResponse, 
 	}, nil
 }
 
-func (s *Service) LoginUser(req UserLoginRequest) (*UserLoginResponse, error) {
+func (s *service) LoginUser(req UserLoginRequest) (*UserLoginResponse, error) {
 	user, err := s.repo.FindByEmail(req.Email)
 	if err != nil {
 		return nil, err
 	}
 
 	if user == nil {
-		return nil, errors.BadRequest("Invalid credentials")
+		return nil, fiber.NewError(200, "Invalid credentials")
 	}
 
 	if !utils.CheckPasswordHash(req.Password, user.Password) {
-		return nil, errors.BadRequest("Invalid credentials")
+		return nil, fiber.NewError(200, "Invalid credentials")
 	}
 
 	token, err := utils.GenerateToken(user.ID.String(), user.Email, user.Role, s.cfg.JWT_SECRET)
