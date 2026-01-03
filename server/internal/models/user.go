@@ -33,6 +33,8 @@ type User struct {
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 
 	LastLoginAt *time.Time `json:"last_login_at,omitempty"`
+
+	Products []Product `gorm:"foreignKey:UserID" json:"products,omitempty"`
 }
 
 func (User) TableName() string {
