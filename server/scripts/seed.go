@@ -111,11 +111,15 @@ func seedProducts(db *gorm.DB, userID uuid.UUID, categories []models.Category) {
 			Description: fmt.Sprintf("Description for Product %d belonging to %s category", i, category.Name),
 			Price:       float64(rand.Intn(100000)) / 100.0,
 			Stock:       rand.Intn(100),
-			Images:      pq.StringArray{"https://placehold.co/600x400", fmt.Sprintf("https://picsum.photos/seed/%d/200/300", i)},
-			IsActive:    true,
-			UserID:      userID,
-			CategoryID:  category.ID,
-			Brand:       fmt.Sprintf("Brand %c", rune('A'+rand.Intn(26))),
+			Images: pq.StringArray{
+				fmt.Sprintf("https://picsum.photos/seed/%d/200/300", i),
+				fmt.Sprintf("https://picsum.photos/seed/%d/200/300", i+1),
+				"https://placehold.co/600x400",
+			},
+			IsActive:   true,
+			UserID:     userID,
+			CategoryID: category.ID,
+			Brand:      fmt.Sprintf("Brand %c", rune('A'+rand.Intn(26))),
 		}
 
 		if err := db.Create(&product).Error; err != nil {
