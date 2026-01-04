@@ -6,6 +6,8 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/rajan-marasini/EasyBuy/server/internal/config"
+	"github.com/rajan-marasini/EasyBuy/server/internal/utils"
 )
 
 type Handler interface {
@@ -19,10 +21,11 @@ type Handler interface {
 type handler struct {
 	serv      Service
 	validator *validator.Validate
+	cfg       *config.Config
 }
 
-func NewHandler(serv Service) Handler {
-	return &handler{serv, validator.New()}
+func NewHandler(serv Service, cfg *config.Config) Handler {
+	return &handler{serv, validator.New(), cfg}
 }
 
 func (h *handler) GetAllProducts(c *fiber.Ctx) error {
@@ -91,6 +94,16 @@ func (h *handler) CreateProduct(c *fiber.Ctx) error {
 		return fiber.NewError(http.StatusBadRequest, "Invalid request body")
 	}
 
+	// Handle file uploads
+	form, _ := c.MultipartForm()
+	if form != nil && form.File["images"] != nil {
+		images, err := utils.UploadToCloudinary(c.Context(), form.File["images"], h.cfg, "products")
+		if err != nil {
+			return fiber.NewError(http.StatusInternalServerError, err.Error())
+		}
+		req.Images = images
+	}
+
 	if err := h.validator.Struct(req); err != nil {
 		return fiber.NewError(http.StatusBadRequest, err.Error())
 	}
@@ -132,6 +145,16 @@ func (h *handler) UpdateProduct(c *fiber.Ctx) error {
 
 	if err := c.BodyParser(&req); err != nil {
 		return fiber.NewError(http.StatusBadRequest, "Invalid request body")
+	}
+
+	// Handle file uploads
+	form, _ := c.MultipartForm()
+	if form != nil && form.File["images"] != nil {
+		images, err := utils.UploadToCloudinary(c.Context(), form.File["images"], h.cfg, "products")
+		if err != nil {
+			return fiber.NewError(http.StatusInternalServerError, err.Error())
+		}
+		req.Images = images
 	}
 
 	if err := h.validator.Struct(req); err != nil {

@@ -9,7 +9,7 @@ import (
 func RegisterProductsRoute(router fiber.Router, app *app.AppWrapper) {
 	repo := NewRepository(app.DB, app.Redis)
 	serv := NewService(repo)
-	handler := NewHandler(serv)
+	handler := NewHandler(serv, app.Config)
 
 	//public route
 	router.Get("/", handler.GetAllProducts)

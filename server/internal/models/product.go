@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 	"gorm.io/gorm"
 )
 
@@ -15,10 +16,10 @@ type Product struct {
 
 	Brand string `gorm:"type:text" json:"brand"`
 
-	Price    float64 `gorm:"not null" json:"price"`
-	Stock    int     `gorm:"default:0" json:"stock"`
-	ImageURL string  `gorm:"size:500" json:"image_url"`
-	IsActive bool    `gorm:"default:true" json:"is_active"`
+	Price    float64        `gorm:"not null" json:"price"`
+	Stock    int            `gorm:"default:0" json:"stock"`
+	Images   pq.StringArray `gorm:"type:text[]" json:"images"`
+	IsActive bool           `gorm:"default:true" json:"is_active"`
 
 	UserID uuid.UUID `gorm:"type:uuid;not null;index" json:"user_id"`
 	User   User      `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"-"`

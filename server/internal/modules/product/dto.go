@@ -14,23 +14,25 @@ type PaginationRequest struct {
 }
 
 type CreateProductRequest struct {
-	Name        string  `json:"name" validate:"required,min=3,max=255"`
-	Description string  `json:"description" validate:"omitempty"`
-	Price       float64 `json:"price" validate:"required,min=0"`
-	Stock       int     `json:"stock" validate:"required,min=0"`
-	ImageURL    string  `json:"image_url" validate:"omitempty,url"`
-	IsActive    bool    `json:"is_active" validate:"omitempty"`
-	Brand       string  `json:"brand"`
+	Name        string    `json:"name" form:"name" validate:"required,min=3,max=255"`
+	Description string    `json:"description" form:"description" validate:"omitempty"`
+	Price       float64   `json:"price" form:"price" validate:"required,min=0"`
+	Stock       int       `json:"stock" form:"stock" validate:"required,min=0"`
+	Images      []string  `json:"images" form:"images" validate:"omitempty"`
+	IsActive    bool      `json:"is_active" form:"isActive" validate:"omitempty"`
+	Brand       string    `json:"brand" form:"brand"`
+	CategoryID  uuid.UUID `json:"category_id" form:"category_id" validate:"omitempty"`
 }
 
 type UpdateProductRequest struct {
-	Name        string  `json:"name" validate:"omitempty,min=3,max=255"`
-	Description string  `json:"description" validate:"omitempty"`
-	Price       float64 `json:"price" validate:"omitempty,min=0"`
-	Stock       int     `json:"stock" validate:"omitempty,min=0"`
-	ImageURL    string  `json:"image_url" validate:"omitempty,url"`
-	IsActive    bool    `json:"is_active" validate:"omitempty"`
-	Brand       string  `json:"brand"`
+	Name        string    `json:"name" form:"name" validate:"omitempty,min=3,max=255"`
+	Description string    `json:"description" form:"description" validate:"omitempty"`
+	Price       float64   `json:"price" form:"price" validate:"omitempty,min=0"`
+	Stock       int       `json:"stock" form:"stock" validate:"omitempty,min=0"`
+	Images      []string  `json:"images" form:"images" validate:"omitempty"`
+	IsActive    bool      `json:"is_active" form:"isActive" validate:"omitempty"`
+	Brand       string    `json:"brand" form:"brand"`
+	CategoryID  uuid.UUID `json:"category_id" form:"category_id" validate:"omitempty"`
 }
 
 type PaginationMeta struct {
@@ -46,7 +48,7 @@ type ProductDTO struct {
 	Description string               `json:"description"`
 	Price       float64              `json:"price"`
 	Stock       int                  `json:"stock"`
-	ImageURL    string               `json:"image_url"`
+	Images      []string             `json:"images"`
 	IsActive    bool                 `json:"is_active"`
 	UserID      uuid.UUID            `json:"user_id"`
 	CategoryID  uuid.UUID            `json:"category_id"`
@@ -68,7 +70,7 @@ func ToProductDTO(p *models.Product) ProductDTO {
 		Description: p.Description,
 		Price:       p.Price,
 		Stock:       p.Stock,
-		ImageURL:    p.ImageURL,
+		Images:      p.Images,
 		IsActive:    p.IsActive,
 		UserID:      p.UserID,
 		CategoryID:  p.CategoryID,

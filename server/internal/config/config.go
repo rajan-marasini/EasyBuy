@@ -23,6 +23,10 @@ type Config struct {
 	REDIS_ADDRESS  string `env:"REDIS_ADDRESS" envDefault:""`
 	REDIS_PASSWORD string `env:"REDIS_PASSWORD" envDefault:""`
 	REDIS_DB       string `env:"REDIS_DB" envDefault:""`
+
+	CLOUDINARY_CLOUD_NAME string `env:"CLOUDINARY_CLOUD_NAME"`
+	CLOUDINARY_API_KEY    string `env:"CLOUDINARY_API_KEY"`
+	CLOUDINARY_API_SECRET string `env:"CLOUDINARY_API_SECRET"`
 }
 
 func Load() *Config {

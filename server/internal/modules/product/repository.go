@@ -111,6 +111,11 @@ func (r *repository) Create(ctx context.Context, product *models.Product) (*mode
 		return nil, err
 	}
 
+	// Load association for the response
+	if err := r.db.WithContext(ctx).Preload("Category").First(product, "id = ?", product.ID).Error; err != nil {
+		return nil, err
+	}
+
 	if productByte, err := json.Marshal(product); err == nil {
 		cacheKey := fmt.Sprintf("product:id:%s", product.ID)
 		r.redis.Set(ctx, cacheKey, &productByte, time.Hour)
@@ -128,6 +133,11 @@ func (r *repository) Update(ctx context.Context, product *models.Product) (*mode
 		Where("id=?", product.ID).
 		Updates(&product).
 		Error; err != nil {
+		return nil, err
+	}
+
+	// Load association for the response
+	if err := r.db.WithContext(ctx).Preload("Category").First(product, "id = ?", product.ID).Error; err != nil {
 		return nil, err
 	}
 

@@ -6,14 +6,14 @@ import (
 )
 
 type ProductSlimDTO struct {
-	ID          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	Price       float64   `json:"price"`
-	Stock       int       `json:"stock"`
-	ImageURL    string    `json:"image_url"`
-	IsActive    bool      `json:"is_active"`
-	Brand       string    `json:"brand"`
+	ID          *uuid.UUID `json:"id,omitempty"`
+	Name        string     `json:"name"`
+	Description string     `json:"description"`
+	Price       float64    `json:"price"`
+	Stock       int        `json:"stock"`
+	Images      []string   `json:"images"`
+	IsActive    bool       `json:"is_active"`
+	Brand       string     `json:"brand"`
 }
 
 type CreateCategoryRequest struct {
@@ -25,7 +25,7 @@ type UpdateCategoryRequest struct {
 }
 
 type CategoryDTO struct {
-	ID       uuid.UUID        `json:"id"`
+	ID       *uuid.UUID       `json:"id,omitempty"`
 	Name     string           `json:"name"`
 	Products []ProductSlimDTO `json:"products,omitempty"`
 }
@@ -33,20 +33,29 @@ type CategoryDTO struct {
 func ToCategoryDTO(c *models.Category) CategoryDTO {
 	var productDTOs []ProductSlimDTO
 	for _, p := range c.Products {
+		var pID *uuid.UUID
+		if p.ID != uuid.Nil {
+			pID = &p.ID
+		}
 		productDTOs = append(productDTOs, ProductSlimDTO{
-			ID:          p.ID,
+			ID:          pID,
 			Name:        p.Name,
 			Description: p.Description,
 			Price:       p.Price,
 			Stock:       p.Stock,
-			ImageURL:    p.ImageURL,
+			Images:      p.Images,
 			IsActive:    p.IsActive,
 			Brand:       p.Brand,
 		})
 	}
 
+	var cID *uuid.UUID
+	if c.ID != uuid.Nil {
+		cID = &c.ID
+	}
+
 	return CategoryDTO{
-		ID:       c.ID,
+		ID:       cID,
 		Name:     c.Name,
 		Products: productDTOs,
 	}

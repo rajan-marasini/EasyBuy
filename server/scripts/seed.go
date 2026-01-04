@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 	"github.com/rajan-marasini/EasyBuy/server/internal/config"
 	"github.com/rajan-marasini/EasyBuy/server/internal/database"
 	"github.com/rajan-marasini/EasyBuy/server/internal/models"
@@ -110,7 +111,7 @@ func seedProducts(db *gorm.DB, userID uuid.UUID, categories []models.Category) {
 			Description: fmt.Sprintf("Description for Product %d belonging to %s category", i, category.Name),
 			Price:       float64(rand.Intn(100000)) / 100.0,
 			Stock:       rand.Intn(100),
-			ImageURL:    fmt.Sprintf("https://picsum.photos/seed/%d/200/300", i),
+			Images:      pq.StringArray{"https://placehold.co/600x400", fmt.Sprintf("https://picsum.photos/seed/%d/200/300", i)},
 			IsActive:    true,
 			UserID:      userID,
 			CategoryID:  category.ID,
