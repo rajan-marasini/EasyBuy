@@ -56,6 +56,7 @@ func (r *repository) GetAllProducts(ctx context.Context, page, limit int) ([]mod
 	if err := r.db.
 		WithContext(ctx).
 		Model(&models.Product{}).
+		Preload("Category").
 		Limit(limit).
 		Offset(offset).
 		Find(&products).Error; err != nil {
@@ -87,6 +88,7 @@ func (r *repository) GetByID(ctx context.Context, id string) (*models.Product, e
 
 	var product models.Product
 	err := r.db.WithContext(ctx).
+		Preload("Category").
 		First(&product, "id = ?", id).Error
 
 	if err != nil {

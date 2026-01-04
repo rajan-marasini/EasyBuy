@@ -21,11 +21,17 @@ func main() {
 	// 2. Connect to Database
 	db := database.Connect(cfg)
 
-	// 3. Seed User
+	// 3. Migrate Database
+	database.Migrate(db)
+
+	// 4. Seed User
 	adminUser := seedUser(db)
 
-	// 4. Seed Products
-	seedProducts(db, adminUser.ID)
+	// 5. Seed Categories
+	categories := seedCategories(db)
+
+	// 6. Seed Products
+	seedProducts(db, adminUser.ID, categories)
 
 	log.Println("Seeding completed successfully")
 }
@@ -64,25 +70,51 @@ func seedUser(db *gorm.DB) *models.User {
 	return &user
 }
 
-func seedProducts(db *gorm.DB, userID uuid.UUID) {
+func seedCategories(db *gorm.DB) []models.Category {
+	categoryNames := []string{"Electronics", "Clothing", "Home & Kitchen", "Books", "Beauty"}
+	var categories []models.Category
+
+	for _, name := range categoryNames {
+		var category models.Category
+		if err := db.Where("name = ?", name).First(&category).Error; err != nil {
+			category = models.Category{
+				Name: name,
+			}
+			if err := db.Create(&category).Error; err != nil {
+				log.Printf("Failed to create category %s: %v\n", name, err)
+			} else {
+				log.Printf("Category %s created successfully\n", name)
+			}
+		} else {
+			log.Printf("Category %s already exists, skipping.\n", name)
+		}
+		categories = append(categories, category)
+	}
+
+	return categories
+}
+
+func seedProducts(db *gorm.DB, userID uuid.UUID, categories []models.Category) {
 	var count int64
 	db.Model(&models.Product{}).Count(&count)
-	if count >= 10 {
-		log.Println("Products already seeded, skipping.")
+	if count >= 20 {
+		log.Println("Products already seeded (at least 20), skipping.")
 		return
 	}
 
-	log.Println("Seeding 10 products...")
-	for i := 1; i <= 10; i++ {
+	log.Println("Seeding 20 products...")
+	for i := 1; i <= 20; i++ {
+		category := categories[rand.Intn(len(categories))]
 		product := models.Product{
 			Name:        fmt.Sprintf("Product %d", i),
-			Description: fmt.Sprintf("Description for Product %d", i),
-			Price:       float64(rand.Intn(100000)) / 100.0, // Random price between 0.00 and 1000.00
+			Description: fmt.Sprintf("Description for Product %d belonging to %s category", i, category.Name),
+			Price:       float64(rand.Intn(100000)) / 100.0,
 			Stock:       rand.Intn(100),
 			ImageURL:    fmt.Sprintf("https://picsum.photos/seed/%d/200/300", i),
 			IsActive:    true,
 			UserID:      userID,
-			Brand:       "",
+			CategoryID:  category.ID,
+			Brand:       fmt.Sprintf("Brand %c", rune('A'+rand.Intn(26))),
 		}
 
 		if err := db.Create(&product).Error; err != nil {

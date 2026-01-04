@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/rajan-marasini/EasyBuy/server/internal/models"
+	"github.com/rajan-marasini/EasyBuy/server/internal/modules/category"
 )
 
 type PaginationRequest struct {
@@ -40,17 +41,19 @@ type PaginationMeta struct {
 }
 
 type ProductDTO struct {
-	ID          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	Price       float64   `json:"price"`
-	Stock       int       `json:"stock"`
-	ImageURL    string    `json:"image_url"`
-	IsActive    bool      `json:"is_active"`
-	UserID      uuid.UUID `json:"user_id"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
-	Brand       string    `json:"brand"`
+	ID          uuid.UUID            `json:"id"`
+	Name        string               `json:"name"`
+	Description string               `json:"description"`
+	Price       float64              `json:"price"`
+	Stock       int                  `json:"stock"`
+	ImageURL    string               `json:"image_url"`
+	IsActive    bool                 `json:"is_active"`
+	UserID      uuid.UUID            `json:"user_id"`
+	CategoryID  uuid.UUID            `json:"category_id"`
+	Category    category.CategoryDTO `json:"category"`
+	CreatedAt   time.Time            `json:"created_at"`
+	UpdatedAt   time.Time            `json:"updated_at"`
+	Brand       string               `json:"brand"`
 }
 
 type PaginatedProductsResponse struct {
@@ -68,6 +71,8 @@ func ToProductDTO(p *models.Product) ProductDTO {
 		ImageURL:    p.ImageURL,
 		IsActive:    p.IsActive,
 		UserID:      p.UserID,
+		CategoryID:  p.CategoryID,
+		Category:    category.ToCategoryDTO(&p.Category),
 		CreatedAt:   p.CreatedAt,
 		UpdatedAt:   p.UpdatedAt,
 		Brand:       p.Brand,
