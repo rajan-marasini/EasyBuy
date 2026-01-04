@@ -13,6 +13,7 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/redis/go-redis/v9 v9.17.2
 	golang.org/x/crypto v0.46.0
+	golang.org/x/sync v0.19.0
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.31.1
 )
@@ -42,7 +43,6 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.51.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
-	golang.org/x/sync v0.19.0 // indirect
 	golang.org/x/sys v0.39.0 // indirect
 	golang.org/x/text v0.32.0 // indirect
 )
