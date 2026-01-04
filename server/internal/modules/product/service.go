@@ -2,10 +2,13 @@ package product
 
 import (
 	"context"
+
+	"github.com/rajan-marasini/EasyBuy/server/internal/models"
 )
 
 type Service interface {
 	GetAllProducts(ctx context.Context, req PaginationRequest) (*PaginatedProductsResponse, error)
+	GetProductById(ctx context.Context, id string) (*models.Product, error)
 }
 
 type service struct {
@@ -41,4 +44,8 @@ func (s *service) GetAllProducts(ctx context.Context, req PaginationRequest) (*P
 		},
 		Data: productDTOs,
 	}, nil
+}
+
+func (s *service) GetProductById(ctx context.Context, id string) (*models.Product, error) {
+	return s.repo.GetByID(ctx, id)
 }

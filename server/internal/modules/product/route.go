@@ -10,5 +10,7 @@ func RegisterProductsRoute(router fiber.Router, app *app.AppWrapper) {
 	serv := NewService(repo)
 	handler := NewHandler(serv)
 
+	//public route
 	router.Get("/", handler.GetAllProducts)
+	router.Get("/:productID", handler.GetProductById)
 }

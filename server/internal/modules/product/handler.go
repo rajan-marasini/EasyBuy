@@ -8,6 +8,7 @@ import (
 
 type Handler interface {
 	GetAllProducts(c *fiber.Ctx) error
+	GetProductById(c *fiber.Ctx) error
 }
 
 type handler struct {
@@ -41,5 +42,23 @@ func (h *handler) GetAllProducts(c *fiber.Ctx) error {
 		"message": "products fetched successfully",
 		"data":    res.Data,
 		"meta":    res.Meta,
+	})
+}
+
+func (h *handler) GetProductById(c *fiber.Ctx) error {
+
+	id := c.Params("productID", "")
+	if id == "" {
+		return fiber.NewError(400, "product id is required")
+	}
+
+	product, err := h.serv.GetProductById(c.Context(), id)
+	if err != nil {
+		return fiber.NewError(404, err.Error())
+	}
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"data":    product,
 	})
 }
