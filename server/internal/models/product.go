@@ -19,7 +19,7 @@ type Product struct {
 	IsActive bool    `gorm:"default:true" json:"is_active"`
 
 	UserID uuid.UUID `gorm:"type:uuid;not null;index" json:"user_id"`
-	User   User      `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"user"`
+	User   User      `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"-"`
 
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`

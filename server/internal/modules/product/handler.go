@@ -19,14 +19,27 @@ func NewHandler(serv Service) Handler {
 }
 
 func (h *handler) GetAllProducts(c *fiber.Ctx) error {
-	res, err := h.serv.GetAllProducts()
+	var req PaginationRequest
+	if err := c.QueryParser(&req); err != nil {
+		return fiber.NewError(http.StatusBadRequest, "Invalid pagination parameters")
+	}
+
+	if req.Page < 1 {
+		req.Page = 1
+	}
+	if req.Limit < 1 {
+		req.Limit = 10
+	}
+
+	res, err := h.serv.GetAllProducts(c.Context(), req)
 	if err != nil {
-		return fiber.NewError(500, err.Error())
+		return fiber.NewError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.Status(http.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "products fetched successfully",
-		"data":    res,
+		"data":    res.Data,
+		"meta":    res.Meta,
 	})
 }

@@ -3,6 +3,7 @@ package product
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"time"
 
@@ -12,7 +13,7 @@ import (
 )
 
 type Repository interface {
-	GetAllProducts() ([]models.Product, error)
+	GetAllProducts(ctx context.Context, page, limit int) ([]models.Product, int64, error)
 }
 
 type repository struct {
@@ -20,30 +21,51 @@ type repository struct {
 	redis *redis.Client
 }
 
-func NewRepository(db *gorm.DB, rds *redis.Client) Repository {
-	return &repository{db, rds}
+func NewRepository(db *gorm.DB, redis *redis.Client) Repository {
+	return &repository{db, redis}
 }
 
-func (r *repository) GetAllProducts() ([]models.Product, error) {
-	var products []models.Product
-	cacheKey := "products:all"
+type productCache struct {
+	Products []models.Product `json:"products"`
+	Total    int64            `json:"total"`
+}
 
-	val, err := r.redis.Get(context.Background(), cacheKey).Result()
-	if err == nil {
-		if err = json.Unmarshal([]byte(val), &products); err == nil {
+func (r *repository) GetAllProducts(ctx context.Context, page, limit int) ([]models.Product, int64, error) {
+	var products []models.Product
+	var total int64
+
+	offset := (page - 1) * limit
+	cacheKey := fmt.Sprintf("products:page:%d:limit:%d", page, limit)
+
+	if val, err := r.redis.Get(ctx, cacheKey).Result(); err == nil {
+		var cache productCache
+		if err := json.Unmarshal([]byte(val), &cache); err == nil {
 			log.Println("Cache hit for", cacheKey)
-			return products, nil
+			return cache.Products, cache.Total, nil
 		}
 	}
 
-	if err := r.db.Model(&models.Product{}).Find(&products).Error; err != nil {
-		return nil, err
+	if err := r.db.Model(&models.Product{}).Count(&total).Error; err != nil {
+		return nil, 0, err
 	}
 
-	if productsByte, err := json.Marshal(&products); err == nil {
+	if err := r.db.
+		WithContext(ctx).
+		Model(&models.Product{}).
+		Limit(limit).
+		Offset(offset).
+		Find(&products).Error; err != nil {
+		return nil, 0, err
+	}
+
+	cacheData := productCache{
+		Products: products,
+		Total:    total,
+	}
+	if bytes, err := json.Marshal(cacheData); err == nil {
 		log.Println("Cache miss for", cacheKey)
-		r.redis.Set(context.Background(), cacheKey, productsByte, time.Hour)
+		r.redis.Set(ctx, cacheKey, bytes, time.Hour)
 	}
 
-	return products, nil
+	return products, total, nil
 }
