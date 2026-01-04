@@ -19,6 +19,7 @@ type CreateProductRequest struct {
 	Stock       int     `json:"stock" validate:"required,min=0"`
 	ImageURL    string  `json:"image_url" validate:"omitempty,url"`
 	IsActive    bool    `json:"is_active" validate:"omitempty"`
+	Brand       string  `json:"brand"`
 }
 
 type UpdateProductRequest struct {
@@ -28,6 +29,7 @@ type UpdateProductRequest struct {
 	Stock       int     `json:"stock" validate:"omitempty,min=0"`
 	ImageURL    string  `json:"image_url" validate:"omitempty,url"`
 	IsActive    bool    `json:"is_active" validate:"omitempty"`
+	Brand       string  `json:"brand"`
 }
 
 type PaginationMeta struct {
@@ -48,6 +50,7 @@ type ProductDTO struct {
 	UserID      uuid.UUID `json:"user_id"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
+	Brand       string    `json:"brand"`
 }
 
 type PaginatedProductsResponse struct {
@@ -67,5 +70,6 @@ func ToProductDTO(p *models.Product) ProductDTO {
 		UserID:      p.UserID,
 		CreatedAt:   p.CreatedAt,
 		UpdatedAt:   p.UpdatedAt,
+		Brand:       p.Brand,
 	}
 }

@@ -13,6 +13,8 @@ type Product struct {
 	Name        string `gorm:"size:255;not null;index" json:"name"`
 	Description string `gorm:"type:text" json:"description"`
 
+	Brand string `gorm:"type:text" json:"brand"`
+
 	Price    float64 `gorm:"not null" json:"price"`
 	Stock    int     `gorm:"default:0" json:"stock"`
 	ImageURL string  `gorm:"size:500" json:"image_url"`

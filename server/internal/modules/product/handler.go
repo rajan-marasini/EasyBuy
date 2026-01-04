@@ -13,6 +13,7 @@ type Handler interface {
 	GetProductById(c *fiber.Ctx) error
 	CreateProduct(c *fiber.Ctx) error
 	UpdateProduct(c *fiber.Ctx) error
+	DeleteProduct(c *fiber.Ctx) error
 }
 
 type handler struct {
@@ -146,5 +147,36 @@ func (h *handler) UpdateProduct(c *fiber.Ctx) error {
 		"success": true,
 		"message": "product updated successfully",
 		"data":    product,
+	})
+}
+
+func (h *handler) DeleteProduct(c *fiber.Ctx) error {
+	userFunc := c.Locals("user")
+	if userFunc == nil {
+		return fiber.NewError(http.StatusUnauthorized, "Details not found")
+	}
+
+	claims, ok := userFunc.(jwt.MapClaims)
+	if !ok {
+		return fiber.NewError(http.StatusInternalServerError, "Invalid token claims")
+	}
+
+	userID, ok := claims["id"].(string)
+	if !ok {
+		return fiber.NewError(http.StatusInternalServerError, "Details not found")
+	}
+
+	id := c.Params("productID", "")
+	if id == "" {
+		return fiber.NewError(400, "product id is required")
+	}
+
+	if err := h.serv.DeleteProduct(c.Context(), id, userID); err != nil {
+		return fiber.NewError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"message": "product deleted successfully",
 	})
 }

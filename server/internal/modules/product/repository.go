@@ -17,6 +17,7 @@ type Repository interface {
 	GetByID(ctx context.Context, id string) (*models.Product, error)
 	Create(ctx context.Context, product *models.Product) (*models.Product, error)
 	Update(ctx context.Context, product *models.Product) (*models.Product, error)
+	Delete(ctx context.Context, id string) (*models.Product, error)
 }
 
 type repository struct {
@@ -119,7 +120,12 @@ func (r *repository) Create(ctx context.Context, product *models.Product) (*mode
 }
 
 func (r *repository) Update(ctx context.Context, product *models.Product) (*models.Product, error) {
-	if err := r.db.WithContext(ctx).Model(&models.Product{}).Updates(&product).Error; err != nil {
+	if err := r.db.
+		WithContext(ctx).
+		Model(&models.Product{}).
+		Where("id=?", product.ID).
+		Updates(&product).
+		Error; err != nil {
 		return nil, err
 	}
 
@@ -131,4 +137,31 @@ func (r *repository) Update(ctx context.Context, product *models.Product) (*mode
 	r.redis.FlushDB(ctx)
 
 	return product, nil
+}
+
+func (r *repository) Delete(ctx context.Context, id string) (*models.Product, error) {
+	var product models.Product
+	if err := r.db.WithContext(ctx).First(&product, "id = ?", id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, fmt.Errorf("product not found")
+		}
+		return nil, err
+	}
+
+	if err := r.db.WithContext(ctx).Delete(&product).Error; err != nil {
+		return nil, err
+	}
+
+	cacheKey := fmt.Sprintf("product:id:%s", id)
+	r.redis.Del(ctx, cacheKey)
+
+	iter := r.redis.Scan(ctx, 0, "products:page:*", 0).Iterator()
+	for iter.Next(ctx) {
+		r.redis.Del(ctx, iter.Val())
+	}
+	if err := iter.Err(); err != nil {
+		log.Println("Error clearing paginated product cache:", err)
+	}
+
+	return &product, nil
 }

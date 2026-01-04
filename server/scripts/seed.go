@@ -82,6 +82,7 @@ func seedProducts(db *gorm.DB, userID uuid.UUID) {
 			ImageURL:    fmt.Sprintf("https://picsum.photos/seed/%d/200/300", i),
 			IsActive:    true,
 			UserID:      userID,
+			Brand:       "",
 		}
 
 		if err := db.Create(&product).Error; err != nil {

@@ -17,5 +17,7 @@ func RegisterProductsRoute(router fiber.Router, app *app.AppWrapper) {
 
 	//protected route
 	router.Post("/", middleware.IsAuthenticated(app.Config), middleware.IsAdmin, handler.CreateProduct)
-	router.Put("/:productID", middleware.IsAuthenticated(app.Config), middleware.IsAdmin, handler.UpdateProduct)
+	router.Patch("/:productID", middleware.IsAuthenticated(app.Config), middleware.IsAdmin, handler.UpdateProduct)
+	router.Delete("/:productID", middleware.IsAuthenticated(app.Config), middleware.IsAdmin, handler.DeleteProduct)
+
 }
