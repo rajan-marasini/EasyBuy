@@ -117,5 +117,5 @@ func (r *repository) Delete(ctx context.Context, id string) (*models.Category, e
 }
 
 func (r *repository) invalidateCache(ctx context.Context) {
-	r.redis.FlushDB(ctx)
+	r.redis.Del(ctx, "categories:all")
 }

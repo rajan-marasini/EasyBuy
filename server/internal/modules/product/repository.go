@@ -116,7 +116,7 @@ func (r *repository) Create(ctx context.Context, product *models.Product) (*mode
 		r.redis.Set(ctx, cacheKey, &productByte, time.Hour)
 	}
 
-	r.redis.FlushDB(ctx)
+	r.invalidateCache(ctx)
 
 	return product, nil
 }
@@ -136,7 +136,7 @@ func (r *repository) Update(ctx context.Context, product *models.Product) (*mode
 		r.redis.Set(ctx, cacheKey, &productByte, time.Hour)
 	}
 
-	r.redis.FlushDB(ctx)
+	r.invalidateCache(ctx)
 
 	return product, nil
 }
@@ -157,13 +157,13 @@ func (r *repository) Delete(ctx context.Context, id string) (*models.Product, er
 	cacheKey := fmt.Sprintf("product:id:%s", id)
 	r.redis.Del(ctx, cacheKey)
 
+	return &product, nil
+}
+
+func (r *repository) invalidateCache(ctx context.Context) {
+	// Invalidate paginated product list cache
 	iter := r.redis.Scan(ctx, 0, "products:page:*", 0).Iterator()
 	for iter.Next(ctx) {
 		r.redis.Del(ctx, iter.Val())
 	}
-	if err := iter.Err(); err != nil {
-		log.Println("Error clearing paginated product cache:", err)
-	}
-
-	return &product, nil
 }

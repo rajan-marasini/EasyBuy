@@ -130,5 +130,8 @@ func (r *repository) Delete(ctx context.Context, id string) error {
 }
 
 func (r *repository) invalidateCache(ctx context.Context) {
-	r.redis.FlushDB(ctx) // In a larger app, we'd be more selective, but following existing patterns
+	iter := r.redis.Scan(ctx, 0, "users:page:*", 0).Iterator()
+	for iter.Next(ctx) {
+		r.redis.Del(ctx, iter.Val())
+	}
 }

@@ -38,6 +38,12 @@ func (r *repository) Create(user *models.User) (*models.User, error) {
 		ctx := context.Background()
 		r.redis.Set(ctx, fmt.Sprintf("user:email:%s", user.Email), userBytes, time.Hour)
 		r.redis.Set(ctx, fmt.Sprintf("user:id:%s", user.ID), userBytes, time.Hour)
+
+		// Invalidate paginated user list cache
+		iter := r.redis.Scan(ctx, 0, "users:page:*", 0).Iterator()
+		for iter.Next(ctx) {
+			r.redis.Del(ctx, iter.Val())
+		}
 	}
 
 	return user, nil
