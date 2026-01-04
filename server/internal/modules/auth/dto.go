@@ -19,6 +19,7 @@ type UserLoginRequest struct {
 }
 
 type UserLoginResponse struct {
+	ID    string `json:"id"`
 	Name  string `json:"name"`
 	Token string `json:"-"`
 	Email string `json:"email"`

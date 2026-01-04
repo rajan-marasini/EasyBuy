@@ -15,6 +15,7 @@ import (
 type Repository interface {
 	GetAllProducts(ctx context.Context, page, limit int) ([]models.Product, int64, error)
 	GetByID(ctx context.Context, id string) (*models.Product, error)
+	Create(ctx context.Context, product *models.Product) (*models.Product, error)
 }
 
 type repository struct {
@@ -95,4 +96,17 @@ func (r *repository) GetByID(ctx context.Context, id string) (*models.Product, e
 	}
 
 	return &product, nil
+}
+
+func (r *repository) Create(ctx context.Context, product *models.Product) (*models.Product, error) {
+	if err := r.db.WithContext(ctx).Model(&models.Product{}).Create(&product).Error; err != nil {
+		return nil, err
+	}
+
+	if productByte, err := json.Marshal(product); err == nil {
+		cacheKey := fmt.Sprintf("product:id:%s", product.ID)
+		r.redis.Set(ctx, cacheKey, &productByte, time.Hour)
+	}
+
+	return product, nil
 }

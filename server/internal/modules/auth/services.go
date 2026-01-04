@@ -78,6 +78,7 @@ func (s *service) LoginUser(req UserLoginRequest) (*UserLoginResponse, error) {
 	}
 
 	return &UserLoginResponse{
+		ID:    user.ID.String(),
 		Name:  user.Name,
 		Email: user.Email,
 		Role:  user.Role,

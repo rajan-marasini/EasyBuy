@@ -3,6 +3,7 @@ package product
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/rajan-marasini/EasyBuy/server/internal/app"
+	"github.com/rajan-marasini/EasyBuy/server/internal/middleware"
 )
 
 func RegisterProductsRoute(router fiber.Router, app *app.AppWrapper) {
@@ -13,4 +14,7 @@ func RegisterProductsRoute(router fiber.Router, app *app.AppWrapper) {
 	//public route
 	router.Get("/", handler.GetAllProducts)
 	router.Get("/:productID", handler.GetProductById)
+
+	//protected route
+	router.Post("/", middleware.IsAuthenticated(app.Config), handler.CreateProduct)
 }
