@@ -1,7 +1,9 @@
 package database
 
 import (
+	"context"
 	"log"
+	"os"
 	"strconv"
 
 	"github.com/rajan-marasini/EasyBuy/server/internal/config"
@@ -16,7 +18,12 @@ func ConnectRedis(cfg *config.Config) *redis.Client {
 		DB:       db,
 	})
 
-	log.Println("Redis connected successfully")
+	if err := rdb.Ping(context.Background()).Err(); err != nil {
+		log.Println("Redis Connection Failed")
+		os.Exit(1)
+	} else {
+		log.Println("Redis connected successfully")
+	}
 
 	return rdb
 }
