@@ -3,6 +3,7 @@ package routes
 import (
 	"github.com/rajan-marasini/EasyBuy/server/internal/app"
 	"github.com/rajan-marasini/EasyBuy/server/internal/modules/auth"
+	"github.com/rajan-marasini/EasyBuy/server/internal/modules/category"
 	"github.com/rajan-marasini/EasyBuy/server/internal/modules/product"
 )
 
@@ -15,4 +16,7 @@ func RegisterRoutes(app *app.AppWrapper) {
 
 	productGroup := v1.Group("/products")
 	product.RegisterProductsRoute(productGroup, app)
+
+	categoryGroup := v1.Group("/categories")
+	category.RegisterCategoryRoutes(categoryGroup, app)
 }
