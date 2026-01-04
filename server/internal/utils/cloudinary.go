@@ -8,6 +8,7 @@ import (
 	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 	"github.com/rajan-marasini/EasyBuy/server/internal/config"
+	"golang.org/x/sync/errgroup"
 )
 
 // UploadToCloudinary uploads multiple files to Cloudinary and returns their URLs
@@ -21,22 +22,32 @@ func UploadToCloudinary(ctx context.Context, files []*multipart.FileHeader, cfg 
 		return nil, fmt.Errorf("failed to initialize Cloudinary: %w", err)
 	}
 
-	var urls []string
-	for _, fileHeader := range files {
-		file, err := fileHeader.Open()
-		if err != nil {
-			return nil, fmt.Errorf("failed to open file: %w", err)
-		}
-		defer file.Close()
+	urls := make([]string, len(files))
+	g, ctx := errgroup.WithContext(ctx)
 
-		resp, err := cld.Upload.Upload(ctx, file, uploader.UploadParams{
-			Folder: folder,
+	for i, fileHeader := range files {
+		i, fileHeader := i, fileHeader // capture loop variables
+		g.Go(func() error {
+			file, err := fileHeader.Open()
+			if err != nil {
+				return fmt.Errorf("failed to open file at index %d: %w", i, err)
+			}
+			defer file.Close()
+
+			resp, err := cld.Upload.Upload(ctx, file, uploader.UploadParams{
+				Folder: folder,
+			})
+			if err != nil {
+				return fmt.Errorf("failed to upload file at index %d to Cloudinary: %w", i, err)
+			}
+
+			urls[i] = resp.SecureURL
+			return nil
 		})
-		if err != nil {
-			return nil, fmt.Errorf("failed to upload to Cloudinary: %w", err)
-		}
+	}
 
-		urls = append(urls, resp.SecureURL)
+	if err := g.Wait(); err != nil {
+		return nil, err
 	}
 
 	return urls, nil
