@@ -10,6 +10,7 @@ import (
 type Service interface {
 	RegisterUser(req UserRegisterRequest) (*UserRegisterResponse, error)
 	LoginUser(req UserLoginRequest) (*UserLoginResponse, error)
+	GetUserProfile(userID string) (*UserRegisterResponse, error)
 }
 
 type service struct {
@@ -84,5 +85,21 @@ func (s *service) LoginUser(req UserLoginRequest) (*UserLoginResponse, error) {
 		Role:  user.Role,
 		Token: token,
 	}, nil
+}
 
+func (s *service) GetUserProfile(userID string) (*UserRegisterResponse, error) {
+	user, err := s.repo.FindByID(userID)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, fiber.NewError(404, "User not found")
+	}
+
+	return &UserRegisterResponse{
+		ID:    user.ID.String(),
+		Name:  user.Name,
+		Email: user.Email,
+		Role:  user.Role,
+	}, nil
 }

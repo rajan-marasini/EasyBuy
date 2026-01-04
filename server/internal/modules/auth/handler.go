@@ -1,8 +1,11 @@
 package auth
 
 import (
+	"net/http"
+
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/rajan-marasini/EasyBuy/server/internal/config"
 )
 
@@ -10,6 +13,7 @@ type Handler interface {
 	RegisterUser(c *fiber.Ctx) error
 	LoginUser(c *fiber.Ctx) error
 	LogoutUser(c *fiber.Ctx) error
+	GetProfile(c *fiber.Ctx) error
 }
 
 type handler struct {
@@ -92,5 +96,33 @@ func (h *handler) LogoutUser(c *fiber.Ctx) error {
 	return c.Status(200).JSON(fiber.Map{
 		"success": true,
 		"message": "User logged out successfully",
+	})
+}
+
+func (h *handler) GetProfile(c *fiber.Ctx) error {
+	userFunc := c.Locals("user")
+	if userFunc == nil {
+		return fiber.NewError(http.StatusUnauthorized, "Details not found")
+	}
+
+	claims, ok := userFunc.(jwt.MapClaims)
+	if !ok {
+		return fiber.NewError(http.StatusInternalServerError, "Invalid token claims")
+	}
+
+	id, ok := claims["id"].(string)
+	if !ok {
+		return fiber.NewError(http.StatusInternalServerError, "Details not found")
+	}
+
+	res, err := h.serv.GetUserProfile(id)
+	if err != nil {
+		return err
+	}
+
+	return c.Status(200).JSON(fiber.Map{
+		"success": true,
+		"message": "User profile fetched successfully",
+		"data":    res,
 	})
 }

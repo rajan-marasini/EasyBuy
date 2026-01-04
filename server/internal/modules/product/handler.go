@@ -12,6 +12,7 @@ type Handler interface {
 	GetAllProducts(c *fiber.Ctx) error
 	GetProductById(c *fiber.Ctx) error
 	CreateProduct(c *fiber.Ctx) error
+	UpdateProduct(c *fiber.Ctx) error
 }
 
 type handler struct {
@@ -68,15 +69,6 @@ func (h *handler) GetProductById(c *fiber.Ctx) error {
 }
 
 func (h *handler) CreateProduct(c *fiber.Ctx) error {
-	var req CreateProductRequest
-	if err := c.BodyParser(&req); err != nil {
-		return fiber.NewError(http.StatusBadRequest, "Invalid request body")
-	}
-
-	if err := h.validator.Struct(req); err != nil {
-		return fiber.NewError(http.StatusBadRequest, err.Error())
-	}
-
 	userFunc := c.Locals("user")
 	if userFunc == nil {
 		return fiber.NewError(http.StatusUnauthorized, "Details not found")
@@ -92,6 +84,16 @@ func (h *handler) CreateProduct(c *fiber.Ctx) error {
 		return fiber.NewError(http.StatusInternalServerError, "Details not found")
 	}
 
+	var req CreateProductRequest
+
+	if err := c.BodyParser(&req); err != nil {
+		return fiber.NewError(http.StatusBadRequest, "Invalid request body")
+	}
+
+	if err := h.validator.Struct(req); err != nil {
+		return fiber.NewError(http.StatusBadRequest, err.Error())
+	}
+
 	product, err := h.serv.CreateProduct(c.Context(), req, userID)
 	if err != nil {
 		return fiber.NewError(http.StatusInternalServerError, err.Error())
@@ -100,6 +102,49 @@ func (h *handler) CreateProduct(c *fiber.Ctx) error {
 	return c.Status(http.StatusCreated).JSON(fiber.Map{
 		"success": true,
 		"message": "product created successfully",
+		"data":    product,
+	})
+}
+
+func (h *handler) UpdateProduct(c *fiber.Ctx) error {
+	userFunc := c.Locals("user")
+	if userFunc == nil {
+		return fiber.NewError(http.StatusUnauthorized, "Details not found")
+	}
+
+	claims, ok := userFunc.(jwt.MapClaims)
+	if !ok {
+		return fiber.NewError(http.StatusInternalServerError, "Invalid token claims")
+	}
+
+	userID, ok := claims["id"].(string)
+	if !ok {
+		return fiber.NewError(http.StatusInternalServerError, "Details not found")
+	}
+
+	id := c.Params("productID", "")
+	if id == "" {
+		return fiber.NewError(400, "product id is required")
+	}
+
+	var req UpdateProductRequest
+
+	if err := c.BodyParser(&req); err != nil {
+		return fiber.NewError(http.StatusBadRequest, "Invalid request body")
+	}
+
+	if err := h.validator.Struct(req); err != nil {
+		return fiber.NewError(http.StatusBadRequest, err.Error())
+	}
+
+	product, err := h.serv.UpdateProduct(c.Context(), id, req, userID)
+	if err != nil {
+		return fiber.NewError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"message": "product updated successfully",
 		"data":    product,
 	})
 }

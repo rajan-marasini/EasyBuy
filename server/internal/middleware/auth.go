@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/rajan-marasini/EasyBuy/server/internal/config"
 	"github.com/rajan-marasini/EasyBuy/server/internal/utils"
 )
@@ -37,4 +38,23 @@ func IsAuthenticated(cfg *config.Config) fiber.Handler {
 
 		return c.Next()
 	}
+}
+
+func IsAdmin(c *fiber.Ctx) error {
+	user := c.Locals("user")
+	if user == nil {
+		return fiber.NewError(fiber.StatusUnauthorized, "Unauthorized")
+	}
+
+	claims, ok := user.(jwt.MapClaims)
+	if !ok {
+		return fiber.NewError(fiber.StatusUnauthorized, "Unauthorized")
+	}
+
+	role, ok := claims["role"].(string)
+	if !ok || role != "admin" {
+		return fiber.NewError(fiber.StatusForbidden, "Forbidden access")
+	}
+
+	return c.Next()
 }

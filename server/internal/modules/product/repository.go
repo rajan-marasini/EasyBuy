@@ -16,6 +16,7 @@ type Repository interface {
 	GetAllProducts(ctx context.Context, page, limit int) ([]models.Product, int64, error)
 	GetByID(ctx context.Context, id string) (*models.Product, error)
 	Create(ctx context.Context, product *models.Product) (*models.Product, error)
+	Update(ctx context.Context, product *models.Product) (*models.Product, error)
 }
 
 type repository struct {
@@ -74,32 +75,36 @@ func (r *repository) GetAllProducts(ctx context.Context, page, limit int) ([]mod
 
 func (r *repository) GetByID(ctx context.Context, id string) (*models.Product, error) {
 	cacheKey := fmt.Sprintf("product:id:%s", id)
-	var product models.Product
+
 	if val, err := r.redis.Get(ctx, cacheKey).Result(); err == nil {
-		if err = json.Unmarshal([]byte(val), &product); err == nil {
-			log.Println("Cache hit for", cacheKey)
+		var product models.Product
+		if err := json.Unmarshal([]byte(val), &product); err == nil {
+			log.Println("Cache hit:", cacheKey)
 			return &product, nil
 		}
 	}
 
-	if err := r.db.
-		WithContext(ctx).
-		Model(&models.Product{}).
-		Where("id=?", id).
-		Find(&product).Error; err != nil {
+	var product models.Product
+	err := r.db.WithContext(ctx).
+		First(&product, "id = ?", id).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, err
+		}
 		return nil, err
 	}
 
-	if productByte, err := json.Marshal(&product); err == nil {
-		log.Println("Cache miss for", cacheKey)
-		r.redis.Set(ctx, cacheKey, productByte, time.Hour)
+	if b, err := json.Marshal(product); err == nil {
+		log.Println("Cache miss:", cacheKey)
+		r.redis.Set(ctx, cacheKey, b, time.Hour)
 	}
 
 	return &product, nil
 }
 
 func (r *repository) Create(ctx context.Context, product *models.Product) (*models.Product, error) {
-	if err := r.db.WithContext(ctx).Model(&models.Product{}).Create(&product).Error; err != nil {
+	if err := r.db.WithContext(ctx).Model(&models.Product{}).Create(product).Error; err != nil {
 		return nil, err
 	}
 
@@ -107,6 +112,23 @@ func (r *repository) Create(ctx context.Context, product *models.Product) (*mode
 		cacheKey := fmt.Sprintf("product:id:%s", product.ID)
 		r.redis.Set(ctx, cacheKey, &productByte, time.Hour)
 	}
+
+	r.redis.FlushDB(ctx)
+
+	return product, nil
+}
+
+func (r *repository) Update(ctx context.Context, product *models.Product) (*models.Product, error) {
+	if err := r.db.WithContext(ctx).Model(&models.Product{}).Updates(&product).Error; err != nil {
+		return nil, err
+	}
+
+	if productByte, err := json.Marshal(product); err == nil {
+		cacheKey := fmt.Sprintf("product:id:%s", product.ID)
+		r.redis.Set(ctx, cacheKey, &productByte, time.Hour)
+	}
+
+	r.redis.FlushDB(ctx)
 
 	return product, nil
 }

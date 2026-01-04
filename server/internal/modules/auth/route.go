@@ -15,4 +15,6 @@ func RegisterAuthRoute(router fiber.Router, app *app.AppWrapper) {
 	router.Post("/login", handler.LoginUser)
 	router.Post("/logout", middleware.IsAuthenticated(app.Config), handler.LogoutUser)
 
+	router.Get("/me", middleware.IsAuthenticated(app.Config), handler.GetProfile)
+
 }

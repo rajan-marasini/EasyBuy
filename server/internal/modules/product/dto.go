@@ -21,6 +21,15 @@ type CreateProductRequest struct {
 	IsActive    bool    `json:"is_active" validate:"omitempty"`
 }
 
+type UpdateProductRequest struct {
+	Name        string  `json:"name" validate:"omitempty,min=3,max=255"`
+	Description string  `json:"description" validate:"omitempty"`
+	Price       float64 `json:"price" validate:"omitempty,min=0"`
+	Stock       int     `json:"stock" validate:"omitempty,min=0"`
+	ImageURL    string  `json:"image_url" validate:"omitempty,url"`
+	IsActive    bool    `json:"is_active" validate:"omitempty"`
+}
+
 type PaginationMeta struct {
 	CurrentPage int   `json:"current_page"`
 	Limit       int   `json:"limit"`
