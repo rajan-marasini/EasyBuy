@@ -1,9 +1,13 @@
 package product
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"net/http"
+
+	"github.com/gofiber/fiber/v2"
+)
 
 type Handler interface {
-	CheckHealth(c *fiber.Ctx) error
+	GetAllProducts(c *fiber.Ctx) error
 }
 
 type handler struct {
@@ -14,6 +18,15 @@ func NewHandler(serv Service) Handler {
 	return &handler{serv}
 }
 
-func (h *handler) CheckHealth(c *fiber.Ctx) error {
-	return c.Status(200).JSON("product route")
+func (h *handler) GetAllProducts(c *fiber.Ctx) error {
+	res, err := h.serv.GetAllProducts()
+	if err != nil {
+		return fiber.NewError(500, err.Error())
+	}
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"message": "products fetched successfully",
+		"data":    res,
+	})
 }

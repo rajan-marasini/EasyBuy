@@ -10,5 +10,5 @@ func RegisterProductsRoute(router fiber.Router, app *app.AppWrapper) {
 	serv := NewService(repo)
 	handler := NewHandler(serv)
 
-	router.Get("/", handler.CheckHealth)
+	router.Get("/", handler.GetAllProducts)
 }
