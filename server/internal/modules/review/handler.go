@@ -1,6 +1,8 @@
 package review
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"github.com/gofiber/fiber/v2"
+)
 
 type Handler interface {
 	GetProductReviews(c *fiber.Ctx) error
@@ -18,7 +20,19 @@ func NewHandler(serv Service) Handler {
 }
 
 func (h *handler) GetProductReviews(c *fiber.Ctx) error {
-	return c.Status(200).JSON("getting product review")
+	productId := c.Params("productId", "")
+	if productId == "" {
+		return fiber.NewError(400, "invalid product id")
+	}
+
+	res, err := h.serv.GetProductReviews(c.Context(), productId)
+	if err != nil {
+		return fiber.NewError(404, "Invalid product id")
+	}
+
+	return c.Status(200).JSON(fiber.Map{
+		"data": res,
+	})
 }
 
 func (h *handler) CreateReview(c *fiber.Ctx) error {
