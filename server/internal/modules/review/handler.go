@@ -1,7 +1,11 @@
 package review
 
 import (
+	"net/http"
+
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type Handler interface {
@@ -12,11 +16,15 @@ type Handler interface {
 }
 
 type handler struct {
-	serv Service
+	serv      Service
+	validator *validator.Validate
 }
 
 func NewHandler(serv Service) Handler {
-	return &handler{serv}
+	return &handler{
+		serv:      serv,
+		validator: validator.New(),
+	}
 }
 
 func (h *handler) GetProductReviews(c *fiber.Ctx) error {
@@ -36,7 +44,41 @@ func (h *handler) GetProductReviews(c *fiber.Ctx) error {
 }
 
 func (h *handler) CreateReview(c *fiber.Ctx) error {
-	return nil
+	userFunc := c.Locals("user")
+	if userFunc == nil {
+		return fiber.NewError(http.StatusUnauthorized, "User details not found")
+	}
+
+	claims, ok := userFunc.(jwt.MapClaims)
+	if !ok {
+		return fiber.NewError(http.StatusInternalServerError, "Invalid token claims")
+	}
+
+	userID, ok := claims["id"].(string)
+	if !ok {
+		return fiber.NewError(http.StatusUnauthorized, "User details not found")
+	}
+
+	var req CreateReviewRequest
+
+	if err := c.BodyParser(&req); err != nil {
+		return fiber.NewError(http.StatusBadRequest, "Invalid request body")
+	}
+
+	if err := h.validator.Struct(req); err != nil {
+		return fiber.NewError(http.StatusBadRequest, err.Error())
+	}
+
+	res, err := h.serv.CreateReview(c.Context(), req, userID)
+	if err != nil {
+		return fiber.NewError(http.StatusInternalServerError, "Failed to create review")
+	}
+
+	return c.Status(http.StatusCreated).JSON(fiber.Map{
+		"success": true,
+		"message": "Product reviewed successfully",
+		"data":    res,
+	})
 }
 
 func (h *handler) UpdateReview(c *fiber.Ctx) error {
