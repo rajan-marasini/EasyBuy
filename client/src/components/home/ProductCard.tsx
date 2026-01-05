@@ -13,6 +13,8 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
+    const addItem = useCartStore((state) => state.addItem);
+
     return (
         <Card className="group overflow-hidden rounded-2xl border-none bg-zinc-50/50 transition-all hover:shadow-xl hover:shadow-blue-500/10 dark:bg-zinc-900/50">
             <Link href={`/product/${product.id}`}>
@@ -61,7 +63,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                     className="w-full rounded-xl bg-zinc-900 font-bold transition-all hover:bg-blue-600 dark:bg-zinc-800 dark:hover:bg-blue-600"
                     disabled={product.stock <= 0}
                     onClick={() => {
-                        useCartStore.getState().addItem(product);
+                        addItem(product);
                         toast.success(`Added ${product.name} to cart!`);
                     }}
                 >

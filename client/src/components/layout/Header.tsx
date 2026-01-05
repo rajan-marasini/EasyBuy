@@ -9,12 +9,22 @@ import { useCartStore } from "@/lib/cart-store";
 import { useSearchStore } from "@/lib/search-store";
 import { Search, ShoppingCart, User } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function Header() {
     const user = useAuthStore((state) => state.user);
-    const getTotalItems = useCartStore((state) => state.getTotalItems);
+    const cartItems = useCartStore((state) => state.items);
     const { searchQuery, setSearchQuery } = useSearchStore();
-    const cartItemsCount = getTotalItems();
+
+    const [isHydrated, setIsHydrated] = useState(false);
+    useEffect(() => {
+        setIsHydrated(true);
+    }, []);
+
+    const cartItemsCount = cartItems.reduce(
+        (sum, item) => sum + item.quantity,
+        0
+    );
 
     return (
         <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur-xl supports-[backdrop-filter]:bg-white/80 shadow-sm">
@@ -47,7 +57,7 @@ export default function Header() {
                         className="relative p-2 text-zinc-700 hover:text-blue-600 transition-all duration-300 hover:scale-110"
                     >
                         <ShoppingCart className="h-6 w-6" />
-                        {cartItemsCount > 0 && (
+                        {isHydrated && cartItemsCount > 0 && (
                             <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-gradient-to-br from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 border-2 border-white shadow-lg animate-in zoom-in-50">
                                 {cartItemsCount}
                             </Badge>

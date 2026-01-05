@@ -7,15 +7,33 @@ import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { useEffect, useState } from "react";
+
 export default function CartPage() {
     const router = useRouter();
     const { items, removeItem, updateQuantity, getTotalPrice, clearCart } =
         useCartStore();
 
+    // Hydration guard for Next.js
+    const [isHydrated, setIsHydrated] = useState(false);
+    useEffect(() => {
+        setIsHydrated(true);
+    }, []);
+
     const totalPrice = getTotalPrice();
     const tax = totalPrice * 0.1; // 10% tax
     const shipping = totalPrice > 100 ? 0 : 10; // Free shipping over $100
     const finalTotal = totalPrice + tax + shipping;
+
+    if (!isHydrated) {
+        return (
+            <div className="container mx-auto px-4 py-20">
+                <div className="max-w-2xl mx-auto text-center">
+                    <div className="animate-pulse bg-zinc-100 rounded-3xl h-[400px]" />
+                </div>
+            </div>
+        );
+    }
 
     if (items.length === 0) {
         return (
