@@ -141,7 +141,7 @@ export default function ProductDetailsPage() {
                             </span>
                         </div>
                         <p className="text-5xl font-black bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-6">
-                            ${(product.price || 0).toLocaleString()}
+                            Rs.{(product.price || 0).toLocaleString()}
                         </p>
                         <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-lg">
                             {product.description ||

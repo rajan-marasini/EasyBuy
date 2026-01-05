@@ -55,7 +55,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                     </span>
                 </div>
                 <p className="text-xl font-black text-blue-600">
-                    ${product.price.toLocaleString()}
+                    Rs.{product.price.toLocaleString()}
                 </p>
             </CardContent>
             <CardFooter className="p-4 pt-0">

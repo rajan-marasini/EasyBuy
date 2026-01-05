@@ -171,14 +171,15 @@ export default function CartPage() {
                                         {/* Price */}
                                         <div className="text-right">
                                             <p className="text-2xl font-black bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                                                $
+                                                Rs.
                                                 {(
                                                     (item.product.price || 0) *
                                                     item.quantity
                                                 ).toLocaleString()}
                                             </p>
                                             <p className="text-xs text-zinc-500">
-                                                ${item.product.price || 0} each
+                                                Rs.{item.product.price || 0}{" "}
+                                                each
                                             </p>
                                         </div>
                                     </div>
@@ -199,13 +200,13 @@ export default function CartPage() {
                             <div className="flex justify-between text-zinc-700">
                                 <span className="font-semibold">Subtotal</span>
                                 <span className="font-bold">
-                                    ${totalPrice.toFixed(2)}
+                                    Rs.{totalPrice.toFixed(2)}
                                 </span>
                             </div>
                             <div className="flex justify-between text-zinc-700">
                                 <span className="font-semibold">Tax (10%)</span>
                                 <span className="font-bold">
-                                    ${tax.toFixed(2)}
+                                    Rs.{tax.toFixed(2)}
                                 </span>
                             </div>
                             <div className="flex justify-between text-zinc-700">
@@ -216,12 +217,12 @@ export default function CartPage() {
                                         shipping === 0 && "text-green-600"
                                     )}
                                 >
-                                    {shipping === 0 ? "FREE" : `$${shipping}`}
+                                    {shipping === 0 ? "FREE" : `Rs.${shipping}`}
                                 </span>
                             </div>
                             {totalPrice < 100 && (
                                 <p className="text-xs text-blue-600 bg-blue-50 p-2 rounded-lg">
-                                    Add ${(100 - totalPrice).toFixed(2)} more
+                                    Add Rs.{(100 - totalPrice).toFixed(2)} more
                                     for free shipping!
                                 </p>
                             )}
@@ -231,7 +232,7 @@ export default function CartPage() {
                                     Total
                                 </span>
                                 <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                                    ${finalTotal.toFixed(2)}
+                                    Rs.{finalTotal.toFixed(2)}
                                 </span>
                             </div>
                         </div>
