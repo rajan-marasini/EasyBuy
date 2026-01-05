@@ -5,6 +5,7 @@ import (
 	"github.com/rajan-marasini/EasyBuy/server/internal/modules/auth"
 	"github.com/rajan-marasini/EasyBuy/server/internal/modules/category"
 	"github.com/rajan-marasini/EasyBuy/server/internal/modules/product"
+	"github.com/rajan-marasini/EasyBuy/server/internal/modules/review"
 	"github.com/rajan-marasini/EasyBuy/server/internal/modules/user"
 )
 
@@ -23,4 +24,8 @@ func RegisterRoutes(app *app.AppWrapper) {
 
 	userGroup := v1.Group("/users")
 	user.RegisterUserRoutes(userGroup, app)
+
+	reviewGroup := v1.Group("/reviews")
+	review.RegisterReviewRoute(reviewGroup, app)
+
 }
