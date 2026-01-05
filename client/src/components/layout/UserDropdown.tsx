@@ -9,7 +9,8 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useAuthStore, User } from "@/lib/auth-store";
+import { useAuth } from "@/hooks/useAuth";
+import { User } from "@/lib/auth-store";
 import {
     LayoutDashboard,
     LogOut,
@@ -18,19 +19,16 @@ import {
     User as UserIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 interface UserDropdownProps {
     user: User;
 }
 
 export default function UserDropdown({ user }: UserDropdownProps) {
-    const router = useRouter();
-    const logout = useAuthStore((state) => state.logout);
+    const { logout } = useAuth();
 
     const handleLogout = () => {
-        logout();
-        router.push("/login");
+        logout.mutate();
     };
 
     return (
