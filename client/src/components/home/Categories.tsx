@@ -82,8 +82,8 @@ export default function Categories({
                                     className={cn(
                                         "p-3.5 rounded-2xl transition-all duration-300 shadow-md relative overflow-hidden",
                                         isActive
-                                            ? "bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg shadow-blue-500/50"
-                                            : "bg-white/80 backdrop-blur-sm group-hover:bg-gradient-to-br group-hover:from-blue-50 group-hover:to-purple-50 group-hover:shadow-lg"
+                                            ? "bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/50"
+                                            : "bg-white/80 backdrop-blur-sm group-hover:bg-gradient-to-br group-hover:from-emerald-50 group-hover:to-teal-50 group-hover:shadow-lg"
                                     )}
                                 >
                                     {/* Glassmorphism overlay */}
@@ -95,7 +95,7 @@ export default function Categories({
                                                 "h-6 w-6 transition-all duration-300 relative z-10",
                                                 isActive
                                                     ? "text-white"
-                                                    : "text-zinc-600 group-hover:text-blue-600"
+                                                    : "text-zinc-600 group-hover:text-emerald-600"
                                             )}
                                         />
                                     ) : (
@@ -104,7 +104,7 @@ export default function Categories({
                                                 "h-6 w-6 flex items-center justify-center font-black text-xs relative z-10 transition-all duration-300",
                                                 isActive
                                                     ? "text-white"
-                                                    : "text-zinc-600 group-hover:text-blue-600"
+                                                    : "text-zinc-600 group-hover:text-emerald-600"
                                             )}
                                         >
                                             ALL
@@ -115,14 +115,14 @@ export default function Categories({
                                     className={cn(
                                         "text-xs font-bold uppercase tracking-wider transition-all duration-300",
                                         isActive
-                                            ? "text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text"
+                                            ? "text-transparent bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text"
                                             : "text-zinc-600 group-hover:text-zinc-900"
                                     )}
                                 >
                                     {cat.name}
                                 </span>
                                 {isActive && (
-                                    <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 h-1 w-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full animate-in slide-in-from-bottom-2 shadow-lg shadow-blue-500/50" />
+                                    <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 h-1 w-12 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-full animate-in slide-in-from-bottom-2 shadow-lg shadow-emerald-500/50" />
                                 )}
                             </button>
                         );

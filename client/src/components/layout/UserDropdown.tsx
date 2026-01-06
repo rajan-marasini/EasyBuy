@@ -36,9 +36,9 @@ export default function UserDropdown({ user }: UserDropdownProps) {
             <DropdownMenuTrigger asChild>
                 <Button
                     variant="ghost"
-                    className="flex items-center gap-2 px-3 h-10 rounded-full hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-300"
+                    className="flex items-center gap-2 px-3 h-10 rounded-full hover:bg-gradient-to-r hover:from-emerald-50 hover:to-teal-50 transition-all duration-300"
                 >
-                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-lg">
+                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-sm shadow-lg">
                         {user.name.charAt(0).toUpperCase()}
                     </div>
                     <span className="hidden md:block font-semibold text-sm text-zinc-700">
@@ -65,9 +65,9 @@ export default function UserDropdown({ user }: UserDropdownProps) {
                         <DropdownMenuItem asChild>
                             <Link
                                 href="/dashboard"
-                                className="flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-200"
+                                className="flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-gradient-to-r hover:from-emerald-50 hover:to-teal-50 transition-all duration-200"
                             >
-                                <LayoutDashboard className="h-4 w-4 text-blue-600" />
+                                <LayoutDashboard className="h-4 w-4 text-emerald-600" />
                                 <span className="font-semibold text-sm">
                                     Dashboard
                                 </span>
