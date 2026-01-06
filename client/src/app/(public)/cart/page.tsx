@@ -39,13 +39,13 @@ export default function CartPage() {
         return (
             <div className="container mx-auto px-4 py-20">
                 <div className="max-w-2xl mx-auto text-center">
-                    <div className="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 rounded-3xl p-16 border-2 border-blue-100">
+                    <div className="bg-linear-to-br from-emerald-50 via-teal-50 to-emerald-50/30 rounded-3xl p-16 border-2 border-emerald-100">
                         <div className="mb-8 flex justify-center">
-                            <div className="h-32 w-32 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-2xl shadow-blue-500/30">
+                            <div className="h-32 w-32 rounded-full bg-linear-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-2xl shadow-emerald-500/30">
                                 <ShoppingBag className="h-16 w-16 text-white" />
                             </div>
                         </div>
-                        <h1 className="text-4xl font-black mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                        <h1 className="text-4xl font-black mb-4 bg-linear-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
                             Your Cart is Empty
                         </h1>
                         <p className="text-zinc-600 mb-8 text-lg">
@@ -55,7 +55,7 @@ export default function CartPage() {
                         <Button
                             size="lg"
                             onClick={() => router.push("/")}
-                            className="rounded-2xl h-14 px-8 text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-xl shadow-blue-500/30 hover:shadow-2xl hover:shadow-blue-500/40 transition-all duration-300 hover:scale-105"
+                            className="rounded-2xl h-14 px-8 text-lg font-bold bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-xl shadow-emerald-500/30 hover:shadow-2xl hover:shadow-emerald-500/40 transition-all duration-300 hover:scale-105"
                         >
                             Start Shopping
                         </Button>
@@ -68,7 +68,7 @@ export default function CartPage() {
     return (
         <div className="container mx-auto px-4 py-12">
             <div className="mb-8 flex items-center justify-between">
-                <h1 className="text-4xl font-black bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <h1 className="text-4xl font-black bg-linear-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
                     Shopping Cart
                 </h1>
                 <Button
@@ -87,11 +87,11 @@ export default function CartPage() {
                     {items.map((item) => (
                         <div
                             key={item.product.id}
-                            className="bg-white rounded-2xl p-6 border-2 border-zinc-100 hover:border-blue-200 transition-all duration-300 hover:shadow-lg group"
+                            className="bg-white rounded-2xl p-6 border-2 border-zinc-100 hover:border-emerald-200 transition-all duration-300 hover:shadow-lg group"
                         >
                             <div className="flex gap-6">
                                 {/* Product Image */}
-                                <div className="relative h-32 w-32 flex-shrink-0 rounded-xl overflow-hidden bg-gradient-to-br from-zinc-50 to-blue-50/30 border border-zinc-200 group-hover:border-blue-300 transition-all duration-300">
+                                <div className="relative h-32 w-32 flex-shrink-0 rounded-xl overflow-hidden bg-linear-to-br from-zinc-50 to-emerald-50/30 border border-zinc-200 group-hover:border-emerald-300 transition-all duration-300">
                                     <img
                                         src={
                                             item.product.images?.[0] ||
@@ -108,7 +108,7 @@ export default function CartPage() {
                                         <div className="flex-1">
                                             <Link
                                                 href={`/product/${item.product.id}`}
-                                                className="font-bold text-lg text-zinc-900 hover:text-blue-600 transition-colors line-clamp-2"
+                                                className="font-bold text-lg text-zinc-900 hover:text-emerald-600 transition-colors line-clamp-2"
                                             >
                                                 {item.product.name}
                                             </Link>
@@ -130,7 +130,7 @@ export default function CartPage() {
 
                                     <div className="flex items-center justify-between mt-4">
                                         {/* Quantity Controls */}
-                                        <div className="flex items-center bg-gradient-to-r from-zinc-100 to-zinc-50 rounded-full p-1 shadow-inner">
+                                        <div className="flex items-center bg-linear-to-r from-zinc-100 to-zinc-50 rounded-full p-1 shadow-inner">
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
@@ -170,7 +170,7 @@ export default function CartPage() {
 
                                         {/* Price */}
                                         <div className="text-right">
-                                            <p className="text-2xl font-black bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                                            <p className="text-2xl font-black bg-linear-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
                                                 Rs.
                                                 {(
                                                     (item.product.price || 0) *
@@ -191,8 +191,8 @@ export default function CartPage() {
 
                 {/* Order Summary */}
                 <div className="lg:col-span-1">
-                    <div className="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 rounded-2xl p-6 border-2 border-blue-100 sticky top-24">
-                        <h2 className="text-2xl font-black mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    <div className="bg-linear-to-br from-emerald-50 via-teal-50 to-emerald-50/30 rounded-2xl p-6 border-2 border-emerald-100 sticky top-24">
+                        <h2 className="text-2xl font-black mb-6 bg-linear-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
                             Order Summary
                         </h2>
 
@@ -221,17 +221,17 @@ export default function CartPage() {
                                 </span>
                             </div>
                             {totalPrice < 100 && (
-                                <p className="text-xs text-blue-600 bg-blue-50 p-2 rounded-lg">
+                                <p className="text-xs text-emerald-600 bg-emerald-50 p-2 rounded-lg">
                                     Add Rs.{(100 - totalPrice).toFixed(2)} more
                                     for free shipping!
                                 </p>
                             )}
-                            <div className="h-px bg-gradient-to-r from-transparent via-zinc-300 to-transparent" />
+                            <div className="h-px bg-linear-to-r from-transparent via-zinc-300 to-transparent" />
                             <div className="flex justify-between text-xl font-black">
-                                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                                <span className="bg-linear-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
                                     Total
                                 </span>
-                                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                                <span className="bg-linear-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
                                     Rs.{finalTotal.toFixed(2)}
                                 </span>
                             </div>
@@ -239,7 +239,7 @@ export default function CartPage() {
 
                         <Button
                             size="lg"
-                            className="w-full rounded-2xl h-14 text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-xl shadow-blue-500/30 hover:shadow-2xl hover:shadow-blue-500/40 transition-all duration-300 hover:scale-105 mb-3"
+                            className="w-full rounded-2xl h-14 text-lg font-bold bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-xl shadow-emerald-500/30 hover:shadow-2xl hover:shadow-emerald-500/40 transition-all duration-300 hover:scale-105 mb-3"
                         >
                             Proceed to Checkout
                         </Button>

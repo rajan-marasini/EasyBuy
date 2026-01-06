@@ -68,7 +68,7 @@ export default function ProductDetailsPage() {
                     </p>
                     <Button
                         onClick={() => router.push("/")}
-                        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                        className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-lg shadow-emerald-500/20"
                     >
                         Back to Home
                     </Button>
@@ -83,8 +83,8 @@ export default function ProductDetailsPage() {
         <div className="container mx-auto px-4 py-12">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                 {/* Product Image */}
-                <div className="bg-gradient-to-br from-zinc-50 to-blue-50/30 rounded-3xl p-8 flex items-center justify-center aspect-square border-2 border-zinc-100 dark:from-zinc-900 dark:to-blue-900/30 relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="bg-gradient-to-br from-zinc-50 to-emerald-50/30 rounded-3xl p-8 flex items-center justify-center aspect-square border-2 border-zinc-100 dark:from-zinc-900 dark:to-emerald-900/30 relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-teal-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     <img
                         src={
                             product.images?.[0] ||
@@ -101,7 +101,7 @@ export default function ProductDetailsPage() {
                         <div className="flex items-center gap-4 mb-4">
                             <Badge
                                 variant="secondary"
-                                className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-none px-4 py-1 text-xs font-bold uppercase tracking-wider shadow-lg shadow-blue-500/30"
+                                className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white border-none px-4 py-1 text-xs font-bold uppercase tracking-wider shadow-lg shadow-emerald-500/30"
                             >
                                 {product.brand}
                             </Badge>
@@ -140,7 +140,7 @@ export default function ProductDetailsPage() {
                                 (150 Reviews)
                             </span>
                         </div>
-                        <p className="text-5xl font-black bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-6">
+                        <p className="text-5xl font-black bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-6">
                             Rs.{(product.price || 0).toLocaleString()}
                         </p>
                         <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-lg">
@@ -191,27 +191,20 @@ export default function ProductDetailsPage() {
                         <div className="flex flex-col sm:flex-row gap-4">
                             <Button
                                 size="lg"
-                                className="flex-1 rounded-2xl h-14 text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-xl shadow-blue-500/30 hover:shadow-2xl hover:shadow-blue-500/40 transition-all duration-300 hover:scale-105"
+                                className="flex-1 rounded-2xl h-14 text-lg font-bold bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-xl shadow-emerald-500/30 hover:shadow-2xl hover:shadow-emerald-500/40 transition-all duration-300 hover:scale-105"
                                 disabled={product.stock <= 0}
                                 onClick={handleAddToCart}
                             >
                                 <ShoppingCart className="mr-2 h-5 w-5" />
                                 Add to Cart
                             </Button>
-                            <Button
-                                size="lg"
-                                variant="outline"
-                                className="flex-1 rounded-2xl h-14 text-lg font-bold border-2 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-300 hover:scale-105 hover:border-blue-300"
-                            >
-                                Buy Now
-                            </Button>
                         </div>
                     </div>
 
                     {/* Features */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-8">
-                        <div className="flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-100 transition-all duration-300 hover:shadow-lg hover:scale-105">
-                            <ShieldCheck className="h-8 w-8 text-blue-600" />
+                        <div className="flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 transition-all duration-300 hover:shadow-lg hover:scale-105">
+                            <ShieldCheck className="h-8 w-8 text-emerald-600" />
                             <div className="text-xs font-bold leading-tight text-zinc-700">
                                 1 YEAR <br /> WARRANTY
                             </div>
@@ -234,16 +227,16 @@ export default function ProductDetailsPage() {
 
             {/* Product Review Section Placeholder */}
             <div className="mt-20">
-                <h3 className="text-3xl font-black mb-10 border-l-8 border-gradient-to-b from-blue-600 to-purple-600 pl-4 uppercase tracking-tighter bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <h3 className="text-3xl font-black mb-10 border-l-8 border-emerald-600 pl-4 uppercase tracking-tighter bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
                     Product Reviews
                 </h3>
-                <div className="bg-gradient-to-br from-zinc-50 to-blue-50/30 rounded-3xl p-12 text-center dark:from-zinc-900 dark:to-blue-900/30 border-2 border-zinc-100">
+                <div className="bg-gradient-to-br from-zinc-50 to-emerald-50/30 rounded-3xl p-12 text-center dark:from-zinc-900 dark:to-emerald-900/30 border-2 border-zinc-100">
                     <p className="text-zinc-400 font-bold uppercase tracking-widest text-xs">
                         No reviews for this product yet. Be the first to review!
                     </p>
                     <Button
                         variant="link"
-                        className="mt-4 text-blue-600 font-bold hover:text-purple-600 transition-colors"
+                        className="mt-4 text-emerald-600 font-bold hover:text-teal-600 transition-colors"
                     >
                         Write a Review
                     </Button>
