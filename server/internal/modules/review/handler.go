@@ -82,7 +82,39 @@ func (h *handler) CreateReview(c *fiber.Ctx) error {
 }
 
 func (h *handler) UpdateReview(c *fiber.Ctx) error {
-	return nil
+	userFunc := c.Locals("user")
+	if userFunc == nil {
+		return fiber.NewError(http.StatusUnauthorized, "User details not found")
+	}
+	_, ok := userFunc.(jwt.Claims)
+	if !ok {
+		return fiber.NewError(http.StatusUnauthorized, "User details not found")
+	}
+
+	reviewID := c.Params("reviewId", "")
+	if reviewID == "" {
+		return fiber.NewError(http.StatusBadRequest, "Review Id is required")
+	}
+
+	var req UpdateReviewRequest
+	if err := c.BodyParser(&req); err != nil {
+		return fiber.NewError(http.StatusBadRequest, err.Error())
+	}
+
+	if err := h.validator.Struct(req); err != nil {
+		return fiber.NewError(http.StatusBadRequest, err.Error())
+	}
+
+	res, err := h.serv.UpdateReview(c.Context(), req, reviewID)
+	if err != nil {
+		return err
+	}
+
+	return c.Status(200).JSON(fiber.Map{
+		"success": true,
+		"message": "Review updated successfully",
+		"data":    res,
+	})
 }
 
 func (h *handler) DeleteReview(c *fiber.Ctx) error {

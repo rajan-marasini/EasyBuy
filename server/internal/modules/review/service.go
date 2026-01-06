@@ -10,6 +10,7 @@ import (
 type Service interface {
 	GetProductReviews(ctx context.Context, productID string) ([]models.Review, error)
 	CreateReview(ctx context.Context, review CreateReviewRequest, userID string) (*models.Review, error)
+	UpdateReview(ctx context.Context, req UpdateReviewRequest, rID string) (*models.Review, error)
 }
 
 type service struct {
@@ -44,4 +45,24 @@ func (s *service) CreateReview(ctx context.Context, req CreateReviewRequest, use
 	}
 
 	return review, nil
+}
+
+func (s *service) UpdateReview(ctx context.Context, req UpdateReviewRequest, rID string) (*models.Review, error) {
+
+	reviewID, err := uuid.Parse(rID)
+	if err != nil {
+		return nil, err
+	}
+
+	review := models.Review{
+		Rating:  req.Rating,
+		Comment: req.Comment,
+	}
+
+	updatedReview, err := s.repo.Update(ctx, review, reviewID.String())
+	if err != nil {
+		return nil, err
+	}
+
+	return updatedReview, nil
 }
