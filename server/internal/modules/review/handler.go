@@ -118,5 +118,26 @@ func (h *handler) UpdateReview(c *fiber.Ctx) error {
 }
 
 func (h *handler) DeleteReview(c *fiber.Ctx) error {
-	return nil
+	userFunc := c.Locals("user")
+	if userFunc == nil {
+		return fiber.NewError(http.StatusUnauthorized, "User details not found")
+	}
+	_, ok := userFunc.(jwt.Claims)
+	if !ok {
+		return fiber.NewError(http.StatusUnauthorized, "User details not found")
+	}
+
+	reviewID := c.Params("reviewId", "")
+	if reviewID == "" {
+		return fiber.NewError(http.StatusBadRequest, "Review Id is required")
+	}
+
+	_, err := h.serv.DeleteReview(c.Context(), reviewID)
+	if err != nil {
+		return fiber.NewError(http.StatusInternalServerError, err.Error())
+	}
+	return c.Status(http.StatusNoContent).JSON(fiber.Map{
+		"success": true,
+		"message": "Review deleted successfully",
+	})
 }

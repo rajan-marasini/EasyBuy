@@ -11,6 +11,7 @@ type Service interface {
 	GetProductReviews(ctx context.Context, productID string) ([]models.Review, error)
 	CreateReview(ctx context.Context, review CreateReviewRequest, userID string) (*models.Review, error)
 	UpdateReview(ctx context.Context, req UpdateReviewRequest, rID string) (*models.Review, error)
+	DeleteReview(ctx context.Context, reviewID string) (bool, error)
 }
 
 type service struct {
@@ -65,4 +66,8 @@ func (s *service) UpdateReview(ctx context.Context, req UpdateReviewRequest, rID
 	}
 
 	return updatedReview, nil
+}
+
+func (s *service) DeleteReview(ctx context.Context, reviewID string) (bool, error) {
+	return s.repo.Delete(ctx, reviewID)
 }
