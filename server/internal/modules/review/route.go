@@ -16,6 +16,6 @@ func RegisterReviewRoute(router fiber.Router, app *app.AppWrapper) {
 	// Protected routes
 	router.Post("/", middleware.IsAuthenticated(app.Config), handler.CreateReview)
 	router.Patch("/:reviewId", middleware.IsAuthenticated(app.Config), handler.UpdateReview)
-	router.Delete("/:id", middleware.IsAuthenticated(app.Config), handler.DeleteReview)
+	router.Delete("/:reviewId", middleware.IsAuthenticated(app.Config), handler.DeleteReview)
 
 }
