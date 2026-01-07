@@ -59,6 +59,7 @@ func (r *repository) GetAllProducts(ctx context.Context, page, limit int) ([]mod
 		Preload("Category").
 		Limit(limit).
 		Offset(offset).
+		Order("created_at desc").
 		Find(&products).Error; err != nil {
 		return nil, 0, err
 	}

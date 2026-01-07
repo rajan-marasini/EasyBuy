@@ -14,7 +14,7 @@ type Review struct {
 	UserID    uuid.UUID `gorm:"type:uuid;not null;index" json:"user_id"`
 
 	Product Product `gorm:"foreignKey:ProductID" json:"-"`
-	User    User    `gorm:"foreignKey:UserID" json:"-"`
+	User    User    `gorm:"foreignKey:UserID" json:"user"`
 
 	Rating  int    `gorm:"not null;check:rating >= 1 AND rating <= 5" json:"rating"`
 	Comment string `gorm:"type:text" json:"comment"`
