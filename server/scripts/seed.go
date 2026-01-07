@@ -101,14 +101,14 @@ func seedCategories(db *gorm.DB) []models.Category {
 func seedProducts(db *gorm.DB, userID uuid.UUID, categories []models.Category) []models.Product {
 	var count int64
 	db.Model(&models.Product{}).Count(&count)
-	if count >= 20 {
-		log.Println("Products already seeded (at least 20), skipping.")
+	if count >= 50 {
+		log.Println("Products already seeded (at least 50), skipping.")
 		var products []models.Product
-		db.Limit(20).Find(&products)
+		db.Limit(50).Find(&products)
 		return products
 	}
 
-	log.Println("Seeding 20 products...")
+	log.Println("Seeding 50 products...")
 	var products []models.Product
 
 	// Detailed product description templates
@@ -195,9 +195,21 @@ func seedReviews(db *gorm.DB, adminUser *models.User, products []models.Product)
 
 	// Create reviews for random products
 	reviewCount := 0
-	for i := 0; i < len(products) && reviewCount < 100; i++ {
-		// Each product gets 1-4 reviews
-		numReviews := rand.Intn(4) + 1
+	for i := 0; i < len(products); i++ {
+		// Each product gets 0-15 reviews with weighted distribution
+		// 10% get 0 reviews, 20% get 1-3, 40% get 4-8, 30% get 9-15
+		r := rand.Intn(100)
+		var numReviews int
+		switch {
+		case r < 10: // 10% no reviews
+			numReviews = 0
+		case r < 30: // 20% get 1-3 reviews
+			numReviews = rand.Intn(3) + 1
+		case r < 70: // 40% get 4-8 reviews
+			numReviews = rand.Intn(5) + 4
+		default: // 30% get 9-15 reviews
+			numReviews = rand.Intn(7) + 9
+		}
 
 		for j := 0; j < numReviews; j++ {
 			// Weighted random rating (more likely to be 4-5 stars)
