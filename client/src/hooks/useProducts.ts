@@ -5,7 +5,9 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 export function useProducts(category?: string, search?: string) {
     return useInfiniteQuery({
         queryKey: ["products", { category, search }],
-        queryFn: async ({ pageParam = 1 }) => {
+        queryFn: async ({
+            pageParam = 1,
+        }): Promise<PaginatedProductsResponse> => {
             const params: any = { page: pageParam, limit: 10, search };
 
             if (category && category.toLowerCase() !== "all") {
@@ -18,7 +20,7 @@ export function useProducts(category?: string, search?: string) {
                         limit: (data.products || []).length,
                         total_items: (data.products || []).length,
                     },
-                };
+                } as PaginatedProductsResponse;
             }
 
             const { data } = await api.get<PaginatedProductsResponse>(

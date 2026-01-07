@@ -58,17 +58,17 @@ export default function ProductDetailsPage() {
     if (error) {
         return (
             <div className="container mx-auto px-4 py-20 text-center">
-                <div className="max-w-md mx-auto bg-gradient-to-br from-red-50 to-pink-50 rounded-3xl p-12 border-2 border-red-100">
+                <div className="max-w-md mx-auto bg-linear-to-br from-red-50 to-pink-50 rounded-3xl p-12 border-2 border-red-100">
                     <h1 className="text-3xl font-black text-red-600 mb-4">
                         Product Not Found
                     </h1>
                     <p className="text-zinc-600 mb-6">
-                        The product you're looking for doesn't exist or has been
-                        removed.
+                        The product you&apos;re looking for does&apos;t exist or
+                        has been removed.
                     </p>
                     <Button
                         onClick={() => router.push("/")}
-                        className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-lg shadow-emerald-500/20"
+                        className="bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-lg shadow-emerald-500/20"
                     >
                         Back to Home
                     </Button>
@@ -83,8 +83,9 @@ export default function ProductDetailsPage() {
         <div className="container mx-auto px-4 py-12">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                 {/* Product Image */}
-                <div className="bg-gradient-to-br from-zinc-50 to-emerald-50/30 rounded-3xl p-8 flex items-center justify-center aspect-square border-2 border-zinc-100 dark:from-zinc-900 dark:to-emerald-900/30 relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-teal-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="bg-linear-to-br from-zinc-50 to-emerald-50/30 rounded-3xl p-8 flex items-center justify-center aspect-square border-2 border-zinc-100 dark:from-zinc-900 dark:to-emerald-900/30 relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-linear-to-br from-emerald-500/5 to-teal-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    {/*  eslint-disable-next-line @next/next/no-img-element */}
                     <img
                         src={
                             product.images?.[0] ||
@@ -101,7 +102,7 @@ export default function ProductDetailsPage() {
                         <div className="flex items-center gap-4 mb-4">
                             <Badge
                                 variant="secondary"
-                                className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white border-none px-4 py-1 text-xs font-bold uppercase tracking-wider shadow-lg shadow-emerald-500/30"
+                                className="bg-linear-to-r from-emerald-500 to-teal-600 text-white border-none px-4 py-1 text-xs font-bold uppercase tracking-wider shadow-lg shadow-emerald-500/30"
                             >
                                 {product.brand}
                             </Badge>
@@ -126,7 +127,7 @@ export default function ProductDetailsPage() {
                                     : "Out of Stock"}
                             </div>
                         </div>
-                        <h1 className="text-4xl md:text-5xl font-black mb-4 tracking-tighter leading-tight bg-gradient-to-r from-zinc-900 to-zinc-700 bg-clip-text text-transparent dark:from-zinc-100 dark:to-zinc-300">
+                        <h1 className="text-4xl md:text-5xl font-black mb-4 tracking-tighter leading-tight bg-linear-to-r from-zinc-900 to-zinc-700 bg-clip-text text-transparent dark:from-zinc-100 dark:to-zinc-300">
                             {product.name}
                         </h1>
                         <div className="flex items-center gap-2 mb-6">
@@ -140,7 +141,7 @@ export default function ProductDetailsPage() {
                                 (150 Reviews)
                             </span>
                         </div>
-                        <p className="text-5xl font-black bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-6">
+                        <p className="text-5xl font-black bg-linear-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-6">
                             Rs.{(product.price || 0).toLocaleString()}
                         </p>
                         <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-lg">
@@ -149,7 +150,7 @@ export default function ProductDetailsPage() {
                         </p>
                     </div>
 
-                    <div className="h-px bg-gradient-to-r from-transparent via-zinc-200 to-transparent" />
+                    <div className="h-px bg-linear-to-r from-transparent via-zinc-200 to-transparent" />
 
                     {/* Controls */}
                     <div className="space-y-6">
@@ -157,7 +158,7 @@ export default function ProductDetailsPage() {
                             <span className="font-bold uppercase tracking-widest text-xs text-zinc-400">
                                 Quantity
                             </span>
-                            <div className="flex items-center bg-gradient-to-r from-zinc-100 to-zinc-50 rounded-full p-1 dark:from-zinc-800 dark:to-zinc-900 shadow-inner">
+                            <div className="flex items-center bg-linear-to-r from-zinc-100 to-zinc-50 rounded-full p-1 dark:from-zinc-800 dark:to-zinc-900 shadow-inner">
                                 <Button
                                     variant="ghost"
                                     size="icon"
@@ -191,7 +192,7 @@ export default function ProductDetailsPage() {
                         <div className="flex flex-col sm:flex-row gap-4">
                             <Button
                                 size="lg"
-                                className="flex-1 rounded-2xl h-14 text-lg font-bold bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-xl shadow-emerald-500/30 hover:shadow-2xl hover:shadow-emerald-500/40 transition-all duration-300 hover:scale-105"
+                                className="flex-1 rounded-2xl h-14 text-lg font-bold bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-xl shadow-emerald-500/30 hover:shadow-2xl hover:shadow-emerald-500/40 transition-all duration-300 hover:scale-105"
                                 disabled={product.stock <= 0}
                                 onClick={handleAddToCart}
                             >
@@ -203,19 +204,19 @@ export default function ProductDetailsPage() {
 
                     {/* Features */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-8">
-                        <div className="flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 transition-all duration-300 hover:shadow-lg hover:scale-105">
+                        <div className="flex items-center gap-3 p-4 rounded-2xl bg-linear-to-br from-emerald-50 to-teal-50 border border-emerald-100 transition-all duration-300 hover:shadow-lg hover:scale-105">
                             <ShieldCheck className="h-8 w-8 text-emerald-600" />
                             <div className="text-xs font-bold leading-tight text-zinc-700">
                                 1 YEAR <br /> WARRANTY
                             </div>
                         </div>
-                        <div className="flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 border border-green-100 transition-all duration-300 hover:shadow-lg hover:scale-105">
+                        <div className="flex items-center gap-3 p-4 rounded-2xl bg-linear-to-br from-green-50 to-emerald-50 border border-green-100 transition-all duration-300 hover:shadow-lg hover:scale-105">
                             <Truck className="h-8 w-8 text-green-600" />
                             <div className="text-xs font-bold leading-tight text-zinc-700">
                                 FREE <br /> SHIPPING
                             </div>
                         </div>
-                        <div className="flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-100 transition-all duration-300 hover:shadow-lg hover:scale-105">
+                        <div className="flex items-center gap-3 p-4 rounded-2xl bg-linear-to-br from-orange-50 to-amber-50 border border-orange-100 transition-all duration-300 hover:shadow-lg hover:scale-105">
                             <RefreshCw className="h-8 w-8 text-orange-600" />
                             <div className="text-xs font-bold leading-tight text-zinc-700">
                                 30 DAYS <br /> RETURN
@@ -227,10 +228,10 @@ export default function ProductDetailsPage() {
 
             {/* Product Review Section Placeholder */}
             <div className="mt-20">
-                <h3 className="text-3xl font-black mb-10 border-l-8 border-emerald-600 pl-4 uppercase tracking-tighter bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                <h3 className="text-3xl font-black mb-10 border-l-8 border-emerald-600 pl-4 uppercase tracking-tighter bg-linear-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
                     Product Reviews
                 </h3>
-                <div className="bg-gradient-to-br from-zinc-50 to-emerald-50/30 rounded-3xl p-12 text-center dark:from-zinc-900 dark:to-emerald-900/30 border-2 border-zinc-100">
+                <div className="bg-linear-to-br from-zinc-50 to-emerald-50/30 rounded-3xl p-12 text-center dark:from-zinc-900 dark:to-emerald-900/30 border-2 border-zinc-100">
                     <p className="text-zinc-400 font-bold uppercase tracking-widest text-xs">
                         No reviews for this product yet. Be the first to review!
                     </p>

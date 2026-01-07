@@ -49,8 +49,8 @@ export default function CartPage() {
                             Your Cart is Empty
                         </h1>
                         <p className="text-zinc-600 mb-8 text-lg">
-                            Looks like you haven't added anything to your cart
-                            yet. Start shopping to fill it up!
+                            Looks like you haven&apos;t added anything to your
+                            cart yet. Start shopping to fill it up!
                         </p>
                         <Button
                             size="lg"
@@ -91,7 +91,8 @@ export default function CartPage() {
                         >
                             <div className="flex gap-6">
                                 {/* Product Image */}
-                                <div className="relative h-32 w-32 flex-shrink-0 rounded-xl overflow-hidden bg-linear-to-br from-zinc-50 to-emerald-50/30 border border-zinc-200 group-hover:border-emerald-300 transition-all duration-300">
+                                <div className="relative h-32 w-32 shrink-0 rounded-xl overflow-hidden bg-linear-to-br from-zinc-50 to-emerald-50/30 border border-zinc-200 group-hover:border-emerald-300 transition-all duration-300">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img
                                         src={
                                             item.product.images?.[0] ||
@@ -239,7 +240,7 @@ export default function CartPage() {
 
                         <Button
                             size="lg"
-                            className="w-full rounded-2xl h-14 text-lg font-bold bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-xl shadow-emerald-500/30 hover:shadow-2xl hover:shadow-emerald-500/40 transition-all duration-300 hover:scale-105 mb-3"
+                            className="w-full rounded-2xl h-14 text-lg font-bold bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-xl shadow-emerald-500/30 hover:shadow-2xl hover:shadow-emerald-500/40 transition-all duration-300 hover:scale-105 mb-3 cursor-pointer"
                         >
                             Proceed to Checkout
                         </Button>
@@ -248,7 +249,7 @@ export default function CartPage() {
                             variant="outline"
                             size="lg"
                             onClick={() => router.push("/")}
-                            className="w-full rounded-2xl h-12 font-semibold border-2 hover:bg-white transition-all duration-300"
+                            className="w-full rounded-2xl h-12 font-semibold border-2 hover:bg-white transition-all duration-300 cursor-pointer"
                         >
                             Continue Shopping
                         </Button>
