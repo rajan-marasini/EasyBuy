@@ -28,6 +28,49 @@ func (r *repository) clearCache(ctx context.Context, productId string) {
 	}
 }
 
+func (r *repository) updateProductStats(ctx context.Context, productId string) error {
+	var stats struct {
+		AverageRating float64
+		TotalReviews  int64
+	}
+
+	// Calculate average rating and total reviews
+	err := r.db.WithContext(ctx).
+		Model(&models.Review{}).
+		Where("product_id = ?", productId).
+		Select("COALESCE(AVG(rating), 0) as average_rating, COUNT(*) as total_reviews").
+		Scan(&stats).Error
+
+	if err != nil {
+		return err
+	}
+
+	// Update product with new stats
+	err = r.db.WithContext(ctx).
+		Model(&models.Product{}).
+		Where("id = ?", productId).
+		Updates(map[string]interface{}{
+			"average_rating": stats.AverageRating,
+			"total_reviews":  int(stats.TotalReviews),
+		}).Error
+
+	if err != nil {
+		return err
+	}
+
+	// Invalidate product cache
+	productCacheKey := fmt.Sprintf("product:id:%s", productId)
+	r.redis.Del(ctx, productCacheKey)
+
+	// Invalidate paginated product list cache
+	iter := r.redis.Scan(ctx, 0, "products:page:*", 0).Iterator()
+	for iter.Next(ctx) {
+		r.redis.Del(ctx, iter.Val())
+	}
+
+	return nil
+}
+
 type repository struct {
 	db    *gorm.DB
 	redis *redis.Client
@@ -97,10 +140,24 @@ func (r *repository) Create(ctx context.Context, review models.Review) (*models.
 
 	r.clearCache(ctx, review.ProductID.String())
 
+	// Update product rating statistics
+	if err := r.updateProductStats(ctx, review.ProductID.String()); err != nil {
+		log.Printf("Failed to update product stats: %v", err)
+	}
+
 	return &review, nil
 }
 
 func (r *repository) Update(ctx context.Context, review models.Review, reviewId string) (*models.Review, error) {
+	// First, get the existing review to get the product ID
+	var existingReview models.Review
+	if err := r.db.WithContext(ctx).First(&existingReview, "id = ?", reviewId).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, errors.New("review id not found")
+		}
+		return nil, err
+	}
+
 	result := r.db.
 		WithContext(ctx).
 		Model(&models.Review{}).
@@ -115,7 +172,12 @@ func (r *repository) Update(ctx context.Context, review models.Review, reviewId 
 		return nil, errors.New("review id not found")
 	}
 
-	r.clearCache(ctx, review.ProductID.String())
+	r.clearCache(ctx, existingReview.ProductID.String())
+
+	// Update product rating statistics
+	if err := r.updateProductStats(ctx, existingReview.ProductID.String()); err != nil {
+		log.Printf("Failed to update product stats: %v", err)
+	}
 
 	return &review, nil
 }
@@ -135,6 +197,11 @@ func (r *repository) Delete(ctx context.Context, reviewId string) (bool, error) 
 	}
 
 	r.clearCache(ctx, review.ProductID.String())
+
+	// Update product rating statistics
+	if err := r.updateProductStats(ctx, review.ProductID.String()); err != nil {
+		log.Printf("Failed to update product stats: %v", err)
+	}
 
 	return true, nil
 }

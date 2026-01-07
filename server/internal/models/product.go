@@ -21,6 +21,9 @@ type Product struct {
 	Images   pq.StringArray `gorm:"type:text[]" json:"images"`
 	IsActive bool           `gorm:"default:true" json:"is_active"`
 
+	AverageRating float64 `gorm:"default:0" json:"average_rating"`
+	TotalReviews  int     `gorm:"default:0" json:"total_reviews"`
+
 	UserID uuid.UUID `gorm:"type:uuid;not null;index" json:"user_id"`
 	User   User      `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"-"`
 

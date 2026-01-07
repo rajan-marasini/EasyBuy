@@ -43,19 +43,21 @@ type PaginationMeta struct {
 }
 
 type ProductDTO struct {
-	ID          uuid.UUID            `json:"id"`
-	Name        string               `json:"name"`
-	Description string               `json:"description"`
-	Price       float64              `json:"price"`
-	Stock       int                  `json:"stock"`
-	Images      []string             `json:"images"`
-	IsActive    bool                 `json:"is_active"`
-	UserID      uuid.UUID            `json:"user_id"`
-	CategoryID  uuid.UUID            `json:"category_id"`
-	Category    category.CategoryDTO `json:"category"`
-	CreatedAt   time.Time            `json:"created_at"`
-	UpdatedAt   time.Time            `json:"updated_at"`
-	Brand       string               `json:"brand"`
+	ID            uuid.UUID            `json:"id"`
+	Name          string               `json:"name"`
+	Description   string               `json:"description"`
+	Price         float64              `json:"price"`
+	Stock         int                  `json:"stock"`
+	Images        []string             `json:"images"`
+	IsActive      bool                 `json:"is_active"`
+	AverageRating float64              `json:"average_rating"`
+	TotalReviews  int                  `json:"total_reviews"`
+	UserID        uuid.UUID            `json:"user_id"`
+	CategoryID    uuid.UUID            `json:"category_id"`
+	Category      category.CategoryDTO `json:"category"`
+	CreatedAt     time.Time            `json:"created_at"`
+	UpdatedAt     time.Time            `json:"updated_at"`
+	Brand         string               `json:"brand"`
 }
 
 type PaginatedProductsResponse struct {
@@ -65,18 +67,20 @@ type PaginatedProductsResponse struct {
 
 func ToProductDTO(p *models.Product) ProductDTO {
 	return ProductDTO{
-		ID:          p.ID,
-		Name:        p.Name,
-		Description: p.Description,
-		Price:       p.Price,
-		Stock:       p.Stock,
-		Images:      p.Images,
-		IsActive:    p.IsActive,
-		UserID:      p.UserID,
-		CategoryID:  p.CategoryID,
-		Category:    category.ToCategoryDTO(&p.Category),
-		CreatedAt:   p.CreatedAt,
-		UpdatedAt:   p.UpdatedAt,
-		Brand:       p.Brand,
+		ID:            p.ID,
+		Name:          p.Name,
+		Description:   p.Description,
+		Price:         p.Price,
+		Stock:         p.Stock,
+		Images:        p.Images,
+		IsActive:      p.IsActive,
+		AverageRating: p.AverageRating,
+		TotalReviews:  p.TotalReviews,
+		UserID:        p.UserID,
+		CategoryID:    p.CategoryID,
+		Category:      category.ToCategoryDTO(&p.Category),
+		CreatedAt:     p.CreatedAt,
+		UpdatedAt:     p.UpdatedAt,
+		Brand:         p.Brand,
 	}
 }
