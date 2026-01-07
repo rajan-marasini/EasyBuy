@@ -1,11 +1,22 @@
+"use client";
+
+import { useAuthStore } from "@/lib/auth-store";
 import { Gift, ShoppingBag, Sparkles, TrendingUp } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function AuthLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+    const router = useRouter();
+    const { user } = useAuthStore();
+
+    if (user) {
+        return router.push("/");
+    }
+
     return (
         <div className="flex min-h-screen">
             {/* Left Side - Branding & Description */}

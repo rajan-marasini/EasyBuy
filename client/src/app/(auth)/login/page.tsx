@@ -115,7 +115,7 @@ export default function LoginPage() {
 
                         <Button
                             type="submit"
-                            className="w-full h-12 rounded-xl text-base font-bold bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-lg hover:shadow-xl transition-all"
+                            className="w-full h-12 rounded-xl text-base font-bold bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-lg hover:shadow-xl transition-all"
                             disabled={login.isPending}
                         >
                             {login.isPending ? (
