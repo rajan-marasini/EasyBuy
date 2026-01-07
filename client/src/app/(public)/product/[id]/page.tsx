@@ -132,14 +132,30 @@ export default function ProductDetailsPage() {
                             {product.name}
                         </h1>
                         <div className="flex items-center gap-2 mb-6">
-                            {[...Array(5)].map((_, i) => (
-                                <Star
-                                    key={i}
-                                    className="h-5 w-5 fill-yellow-400 text-yellow-400"
-                                />
-                            ))}
+                            {[...Array(5)].map((_, i) => {
+                                const rating = product.average_rating || 0;
+                                const isFilled = i < Math.floor(rating);
+                                const isHalf =
+                                    i === Math.floor(rating) &&
+                                    rating % 1 >= 0.5;
+
+                                return (
+                                    <Star
+                                        key={i}
+                                        className={`h-5 w-5 ${
+                                            isFilled || isHalf
+                                                ? "fill-yellow-400 text-yellow-400"
+                                                : "fill-none text-zinc-300 dark:text-zinc-600"
+                                        }`}
+                                    />
+                                );
+                            })}
                             <span className="text-sm font-bold text-zinc-500">
-                                (150 Reviews)
+                                ({product.average_rating?.toFixed(1) || "0.0"})
+                                · {product.total_reviews || 0}{" "}
+                                {product.total_reviews === 1
+                                    ? "Review"
+                                    : "Reviews"}
                             </span>
                         </div>
                         <p className="text-5xl font-black bg-linear-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-6">

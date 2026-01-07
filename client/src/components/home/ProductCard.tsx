@@ -44,14 +44,26 @@ export default function ProductCard({ product }: ProductCardProps) {
                     {product.name}
                 </h3>
                 <div className="mb-3 flex items-center justify-center gap-1">
-                    {[...Array(5)].map((_, i) => (
-                        <Star
-                            key={i}
-                            className="h-4 w-4 fill-yellow-400 text-yellow-400"
-                        />
-                    ))}
+                    {[...Array(5)].map((_, i) => {
+                        const rating = product.average_rating || 0;
+                        const isFilled = i < Math.floor(rating);
+                        const isHalf =
+                            i === Math.floor(rating) && rating % 1 >= 0.5;
+
+                        return (
+                            <Star
+                                key={i}
+                                className={`h-4 w-4 ${
+                                    isFilled || isHalf
+                                        ? "fill-yellow-400 text-yellow-400"
+                                        : "fill-none text-zinc-300 dark:text-zinc-600"
+                                }`}
+                            />
+                        );
+                    })}
                     <span className="ml-2 text-sm text-zinc-500 dark:text-zinc-400">
-                        (4.5)
+                        ({product.average_rating?.toFixed(1) || "0.0"}) ·{" "}
+                        {product.total_reviews || 0} reviews
                     </span>
                 </div>
                 <p className="text-2xl font-black bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">

@@ -11,6 +11,8 @@ export interface Product {
     stock: number;
     images: string[];
     is_active: boolean;
+    average_rating: number;
+    total_reviews: number;
     brand: string;
     category_id: string;
     category: Category;
