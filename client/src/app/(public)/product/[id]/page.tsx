@@ -1,5 +1,6 @@
 "use client";
 
+import { ReviewList } from "@/components/reviews/ReviewList";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -226,22 +227,9 @@ export default function ProductDetailsPage() {
                 </div>
             </div>
 
-            {/* Product Review Section Placeholder */}
+            {/* Product Review Section */}
             <div className="mt-20">
-                <h3 className="text-3xl font-black mb-10 border-l-8 border-emerald-600 pl-4 uppercase tracking-tighter bg-linear-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-                    Product Reviews
-                </h3>
-                <div className="bg-linear-to-br from-zinc-50 to-emerald-50/30 rounded-3xl p-12 text-center dark:from-zinc-900 dark:to-emerald-900/30 border-2 border-zinc-100">
-                    <p className="text-zinc-400 font-bold uppercase tracking-widest text-xs">
-                        No reviews for this product yet. Be the first to review!
-                    </p>
-                    <Button
-                        variant="link"
-                        className="mt-4 text-emerald-600 font-bold hover:text-teal-600 transition-colors"
-                    >
-                        Write a Review
-                    </Button>
-                </div>
+                <ReviewList productId={id as string} />
             </div>
         </div>
     );
