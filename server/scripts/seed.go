@@ -37,6 +37,9 @@ func main() {
 	// 7. Seed Reviews
 	seedReviews(db, adminUser, products)
 
+	// 8. Update Product Rating Statistics
+	updateProductRatingStats(db)
+
 	log.Println("Seeding completed successfully")
 }
 
@@ -254,4 +257,49 @@ func getWeightedRating() int {
 	default: // 3% chance of 1 star
 		return 1
 	}
+}
+
+// updateProductRatingStats calculates and updates average_rating and total_reviews for all products
+func updateProductRatingStats(db *gorm.DB) {
+	log.Println("Updating product rating statistics...")
+
+	var products []models.Product
+	if err := db.Find(&products).Error; err != nil {
+		log.Printf("Failed to fetch products: %v\n", err)
+		return
+	}
+
+	for _, product := range products {
+		var stats struct {
+			AverageRating float64
+			TotalReviews  int64
+		}
+
+		// Calculate average rating and total reviews
+		err := db.Model(&models.Review{}).
+			Where("product_id = ?", product.ID).
+			Select("COALESCE(AVG(rating), 0) as average_rating, COUNT(*) as total_reviews").
+			Scan(&stats).Error
+
+		if err != nil {
+			log.Printf("Failed to calculate stats for product %s: %v\n", product.Name, err)
+			continue
+		}
+
+		// Update product with new stats
+		err = db.Model(&models.Product{}).
+			Where("id = ?", product.ID).
+			Updates(map[string]interface{}{
+				"average_rating": stats.AverageRating,
+				"total_reviews":  int(stats.TotalReviews),
+			}).Error
+
+		if err != nil {
+			log.Printf("Failed to update stats for product %s: %v\n", product.Name, err)
+		} else {
+			log.Printf("Updated %s: %.1f stars (%d reviews)\n", product.Name, stats.AverageRating, stats.TotalReviews)
+		}
+	}
+
+	log.Println("Product rating statistics updated successfully")
 }
