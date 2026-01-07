@@ -18,8 +18,8 @@ type UpdateReviewRequest struct {
 }
 
 type ReviewUserDTO struct {
-	Name  string `json:"name"`
-	Email string `json:"email"`
+	Name string `json:"name"`
+	ID   string `json:"id"`
 }
 
 type ReviewResponseDTO struct {
