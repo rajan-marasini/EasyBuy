@@ -120,7 +120,7 @@ func seedProducts(db *gorm.DB, userID uuid.UUID, categories []models.Category) [
 		"Introducing a revolutionary product that redefines excellence in its class. Expertly engineered with premium components and innovative design principles, it offers superior performance and remarkable durability. The comprehensive feature set includes everything you need for optimal functionality, while the elegant aesthetics ensure it looks as good as it performs. Designed for versatility, it adapts seamlessly to various use cases and environments. The robust construction withstands daily wear and tear, maintaining its quality over extended periods. User-centric design philosophy ensures comfortable, efficient operation with minimal learning curve. Backed by extensive research and development, this product represents the pinnacle of quality and innovation. Complete with detailed documentation and excellent after-sales support for your peace of mind.",
 	}
 
-	for i := 1; i <= 20; i++ {
+	for i := 1; i <= 50; i++ {
 		category := categories[rand.Intn(len(categories))]
 		// Use one of the detailed description templates
 		description := descriptionTemplates[rand.Intn(len(descriptionTemplates))]
@@ -131,9 +131,10 @@ func seedProducts(db *gorm.DB, userID uuid.UUID, categories []models.Category) [
 			Price:       float64(rand.Intn(100000)) / 100.0,
 			Stock:       rand.Intn(100),
 			Images: pq.StringArray{
-				fmt.Sprintf("https://picsum.photos/seed/%d/200/300", i),
-				fmt.Sprintf("https://picsum.photos/seed/%d/200/300", i+1),
-				"https://placehold.co/600x400",
+				fmt.Sprintf("https://picsum.photos/seed/%d/300/250", i),
+				fmt.Sprintf("https://picsum.photos/seed/%d/300/250", i+1),
+				fmt.Sprintf("https://picsum.photos/seed/%d/300/250", i+2),
+				fmt.Sprintf("https://picsum.photos/seed/%d/300/250", i+3),
 			},
 			IsActive:   true,
 			UserID:     userID,
@@ -194,7 +195,7 @@ func seedReviews(db *gorm.DB, adminUser *models.User, products []models.Product)
 
 	// Create reviews for random products
 	reviewCount := 0
-	for i := 0; i < len(products) && reviewCount < 50; i++ {
+	for i := 0; i < len(products) && reviewCount < 100; i++ {
 		// Each product gets 1-4 reviews
 		numReviews := rand.Intn(4) + 1
 

@@ -28,7 +28,7 @@ func (s *service) GetProductReviews(ctx context.Context, productID string, page,
 		return nil, err
 	}
 
-	var reviewDTOs []ReviewResponseDTO
+	reviewDTOs := make([]ReviewResponseDTO, 0)
 	for _, r := range reviews {
 		reviewDTOs = append(reviewDTOs, ReviewResponseDTO{
 			ID:        r.ID,
