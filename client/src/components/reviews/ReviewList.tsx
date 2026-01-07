@@ -5,6 +5,7 @@ import { useProductReviews } from "@/hooks/useReviews";
 import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
+import { AddReviewDialog } from "./AddReviewDialog";
 import { ReviewItem } from "./ReviewItem";
 
 interface ReviewListProps {
@@ -51,7 +52,7 @@ export function ReviewList({ productId }: ReviewListProps) {
                 <h3 className="text-3xl font-black border-l-8 border-emerald-600 pl-4 uppercase tracking-tighter bg-linear-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
                     Product Reviews
                 </h3>
-                {/* We can add a "Write a Review" button here later or keep it as per design */}
+                <AddReviewDialog productId={productId} />
             </div>
 
             <div className="space-y-6">

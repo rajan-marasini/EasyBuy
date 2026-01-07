@@ -1,5 +1,9 @@
 import api from "@/lib/api";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import {
+    useInfiniteQuery,
+    useMutation,
+    useQueryClient,
+} from "@tanstack/react-query";
 
 interface ReviewResponse {
     data: any[];
@@ -28,5 +32,32 @@ export function useProductReviews(productId: string) {
             return undefined;
         },
         enabled: !!productId,
+    });
+}
+
+export function useAddReview() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (data: {
+            productId: string;
+            rating: number;
+            comment: string;
+        }) => {
+            const response = await api.post("/reviews", {
+                product_id: data.productId,
+                rating: data.rating,
+                comment: data.comment,
+            });
+            return response.data;
+        },
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({
+                queryKey: ["reviews", variables.productId],
+            });
+            queryClient.invalidateQueries({
+                queryKey: ["product", variables.productId],
+            });
+        },
     });
 }
