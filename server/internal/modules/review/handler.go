@@ -33,14 +33,15 @@ func (h *handler) GetProductReviews(c *fiber.Ctx) error {
 		return fiber.NewError(400, "invalid product id")
 	}
 
-	res, err := h.serv.GetProductReviews(c.Context(), productId)
+	page := c.QueryInt("page", 1)
+	limit := c.QueryInt("limit", 10)
+
+	res, err := h.serv.GetProductReviews(c.Context(), productId, page, limit)
 	if err != nil {
 		return fiber.NewError(404, "Invalid product id")
 	}
 
-	return c.Status(200).JSON(fiber.Map{
-		"data": res,
-	})
+	return c.Status(200).JSON(res)
 }
 
 func (h *handler) CreateReview(c *fiber.Ctx) error {

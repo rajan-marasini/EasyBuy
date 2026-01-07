@@ -14,10 +14,18 @@ import (
 )
 
 type Repository interface {
-	GetProductReviews(ctx context.Context, productId string) ([]models.Review, error)
+	GetProductReviews(ctx context.Context, productId string, page, limit int) ([]models.Review, int64, error)
 	Create(ctx context.Context, review models.Review) (*models.Review, error)
 	Update(ctx context.Context, review models.Review, reviewId string) (*models.Review, error)
 	Delete(ctx context.Context, reviewId string) (bool, error)
+}
+
+func (r *repository) clearCache(ctx context.Context, productId string) {
+	pattern := fmt.Sprintf("reviews:product:%s:page:*", productId)
+	iter := r.redis.Scan(ctx, 0, pattern, 0).Iterator()
+	for iter.Next(ctx) {
+		r.redis.Del(ctx, iter.Val())
+	}
 }
 
 type repository struct {
@@ -29,28 +37,57 @@ func NewRepository(db *gorm.DB, rdb *redis.Client) Repository {
 	return &repository{db, rdb}
 }
 
-func (r *repository) GetProductReviews(ctx context.Context, productId string) ([]models.Review, error) {
-	cacheKey := fmt.Sprintf("reviews:product:%s", productId)
-	var reviews []models.Review
+type reviewCacheData struct {
+	Reviews []models.Review `json:"reviews"`
+	Total   int64           `json:"total"`
+}
 
+func (r *repository) GetProductReviews(ctx context.Context, productId string, page, limit int) ([]models.Review, int64, error) {
+	cacheKey := fmt.Sprintf("reviews:product:%s:page:%d:limit:%d", productId, page, limit)
+
+	// Try fetching from cache
 	val, err := r.redis.Get(ctx, cacheKey).Result()
 	if err == nil {
-		if err := json.Unmarshal([]byte(val), &reviews); err == nil {
+		var cachedData reviewCacheData
+		if err := json.Unmarshal([]byte(val), &cachedData); err == nil {
 			log.Println("Cache hit for", cacheKey)
-			return reviews, nil
+			return cachedData.Reviews, cachedData.Total, nil
 		}
 	}
 
-	if err := r.db.WithContext(ctx).Where("product_id = ?", productId).Find(&reviews).Error; err != nil {
-		return nil, err
+	var reviews []models.Review
+	var total int64
+
+	offset := (page - 1) * limit
+
+	// Count total reviews for the product
+	if err := r.db.WithContext(ctx).Model(&models.Review{}).Where("product_id = ?", productId).Count(&total).Error; err != nil {
+		return nil, 0, err
 	}
 
+	// Fetch paginated reviews with user info
+	if err := r.db.WithContext(ctx).
+		Where("product_id = ?", productId).
+		Preload("User").
+		Offset(offset).
+		Limit(limit).
+		Order("created_at desc").
+		Find(&reviews).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// Store in cache
 	log.Println("Cache miss for", cacheKey)
-	if reviewByte, err := json.Marshal(&reviews); err == nil {
-		r.redis.Set(ctx, cacheKey, reviewByte, time.Hour)
+	cacheData := reviewCacheData{
+		Reviews: reviews,
+		Total:   total,
 	}
 
-	return reviews, nil
+	if dataBytes, err := json.Marshal(cacheData); err == nil {
+		r.redis.Set(ctx, cacheKey, dataBytes, time.Hour)
+	}
+
+	return reviews, total, nil
 }
 
 func (r *repository) Create(ctx context.Context, review models.Review) (*models.Review, error) {
@@ -58,8 +95,7 @@ func (r *repository) Create(ctx context.Context, review models.Review) (*models.
 		return nil, err
 	}
 
-	cacheKey := fmt.Sprintf("reviews:product:%s", review.ProductID)
-	r.redis.Del(ctx, cacheKey)
+	r.clearCache(ctx, review.ProductID.String())
 
 	return &review, nil
 }
@@ -79,8 +115,7 @@ func (r *repository) Update(ctx context.Context, review models.Review, reviewId 
 		return nil, errors.New("review id not found")
 	}
 
-	cacheKey := fmt.Sprintf("reviews:product:%s", review.ProductID)
-	r.redis.Del(ctx, cacheKey)
+	r.clearCache(ctx, review.ProductID.String())
 
 	return &review, nil
 }
@@ -99,8 +134,7 @@ func (r *repository) Delete(ctx context.Context, reviewId string) (bool, error) 
 		return false, err
 	}
 
-	cacheKey := fmt.Sprintf("reviews:product:%s", review.ProductID)
-	r.redis.Del(ctx, cacheKey)
+	r.clearCache(ctx, review.ProductID.String())
 
 	return true, nil
 }
