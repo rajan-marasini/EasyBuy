@@ -18,7 +18,8 @@ export default function ProductCard({ product }: ProductCardProps) {
     return (
         <Card className="group overflow-hidden rounded-2xl border-2 border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 transition-all hover:shadow-2xl hover:shadow-emerald-500/20 hover:border-emerald-200 dark:hover:border-emerald-900 hover:-translate-y-1">
             <Link href={`/product/${product.id}`}>
-                <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-zinc-800 dark:to-zinc-900">
+                <div className="relative aspect-square overflow-hidden bg-linear-to-br from-zinc-50 to-zinc-100 dark:from-zinc-800 dark:to-zinc-900">
+                    {/*  eslint-disable-next-line @next/next/no-img-element */}
                     <img
                         src={
                             product.images?.[0] ||
@@ -29,7 +30,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                     />
                     {product.stock <= 0 && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-                            <span className="rounded-xl bg-gradient-to-r from-red-500 to-red-600 px-4 py-2 text-sm font-bold text-white uppercase shadow-lg">
+                            <span className="rounded-xl bg-linear-to-r from-red-500 to-red-600 px-4 py-2 text-sm font-bold text-white uppercase shadow-lg">
                                 Out of Stock
                             </span>
                         </div>
@@ -40,7 +41,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
                     {product.brand}
                 </p>
-                <h3 className="mb-2 line-clamp-1 text-lg font-bold text-zinc-900 dark:text-white group-hover:bg-gradient-to-r group-hover:from-emerald-600 group-hover:to-teal-600 group-hover:bg-clip-text group-hover:text-transparent transition-all">
+                <h3 className="mb-2 line-clamp-1 text-lg font-bold text-zinc-900 dark:text-white group-hover:bg-linear-to-r group-hover:from-emerald-600 group-hover:to-teal-600 group-hover:bg-clip-text group-hover:text-transparent transition-all">
                     {product.name}
                 </h3>
                 <div className="mb-3 flex items-center justify-center gap-1">
@@ -66,13 +67,13 @@ export default function ProductCard({ product }: ProductCardProps) {
                         {product.total_reviews || 0} reviews
                     </span>
                 </div>
-                <p className="text-2xl font-black bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                <p className="text-2xl font-black bg-linear-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
                     Rs.{product.price.toLocaleString()}
                 </p>
             </CardContent>
             <CardFooter className="p-4 pt-0">
                 <Button
-                    className="w-full rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 font-bold transition-all shadow-lg hover:shadow-xl hover:scale-105"
+                    className="w-full rounded-xl bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 font-bold transition-all shadow-lg hover:shadow-xl hover:scale-105"
                     disabled={product.stock <= 0}
                     onClick={() => {
                         addItem(product);
