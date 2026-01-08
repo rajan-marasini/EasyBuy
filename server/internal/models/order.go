@@ -4,9 +4,11 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type OrderStatus string
+type PaymentStatus string
 type DeliveryStatus string
 
 const (
@@ -15,6 +17,13 @@ const (
 	OrderFailed    OrderStatus = "FAILED"
 	OrderCancelled OrderStatus = "CANCELLED"
 	OrderRefunded  OrderStatus = "REFUNDED"
+)
+
+const (
+	PaymentPending   PaymentStatus = "PENDING"
+	PaymentCompleted PaymentStatus = "COMPLETED"
+	PaymentFailed    PaymentStatus = "FAILED"
+	PaymentRefunded  PaymentStatus = "REFUNDED"
 )
 
 const (
@@ -31,15 +40,31 @@ type Order struct {
 	ID uuid.UUID `gorm:"type:uuid;primaryKey;index" json:"id"`
 
 	UserID uuid.UUID `gorm:"type:uuid;not null;index" json:"user_id"`
-	User   User      `gorm:"foreignKey:UserID" json:"user"`
+	User   User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"user"`
 
-	Amount float64 `gorm:"not null" json:"amount"`
+	TotalAmount float64 `gorm:"type:decimal(12,2);not null;column:total_amount" json:"total_amount"`
 
-	Status         OrderStatus    `gorm:"size:50;default:'PENDING'" json:"status"`
-	DeliveryStatus DeliveryStatus `gorm:"size:50;default:'NOT_SHIPPED'" json:"delivery_status"`
+	PaymentStatus PaymentStatus `gorm:"type:varchar(50);not null;default:'PENDING'" json:"payment_status"`
+	PaymentMethod string        `gorm:"size:50;not null" json:"payment_method"` // COD, KHALTI, STRIPE
+
+	PaidAt *time.Time `json:"paid_at"`
+
+	OrderStatus    OrderStatus    `gorm:"type:varchar(50);not null;default:'PENDING'" json:"order_status"`
+	DeliveryStatus DeliveryStatus `gorm:"type:varchar(50);not null;default:'NOT_SHIPPED'" json:"delivery_status"`
+
+	ShippingAddress string `gorm:"type:text;not null" json:"shipping_address"`
+
+	OrderItems []OrderItem `gorm:"foreignKey:OrderID;constraint:OnDelete:CASCADE" json:"order_items"`
 
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updated_at"`
+}
 
-	OrderItems []OrderItem `gorm:"constraint:OnDelete:CASCADE" json:"order_items"`
+func (Order) TableName() string {
+	return "orders"
+}
+
+func (o *Order) BeforeCreate(tx *gorm.DB) (err error) {
+	o.ID = uuid.New()
+	return
 }

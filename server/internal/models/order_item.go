@@ -2,6 +2,7 @@ package models
 
 import (
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type OrderItem struct {
@@ -15,4 +16,13 @@ type OrderItem struct {
 
 	Quantity int     `gorm:"not null" json:"quantity"`
 	Price    float64 `gorm:"not null" json:"price"`
+}
+
+func (OrderItem) TableName() string {
+	return "order_items"
+}
+
+func (o *OrderItem) BeforeCreate(tx *gorm.DB) (err error) {
+	o.ID = uuid.New()
+	return
 }

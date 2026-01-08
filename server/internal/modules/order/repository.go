@@ -1,0 +1,83 @@
+package order
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/rajan-marasini/EasyBuy/server/internal/models"
+	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
+)
+
+type Repository interface {
+	WithTransaction(fn func(txRepo Repository) error) error
+	CreateOrder(ctx context.Context, order *models.Order) error
+	GetProductByIDLocked(ctx context.Context, id string) (*models.Product, error)
+	CreateOrderItem(ctx context.Context, item *models.OrderItem) error
+	UpdateProductStock(ctx context.Context, id string, newStock int) error
+	UpdateOrderTotal(ctx context.Context, id string, total float64) error
+	InvalidateProductCache(ctx context.Context, productIDs []string) error
+}
+
+type repository struct {
+	db    *gorm.DB
+	redis *redis.Client
+}
+
+func NewRepository(db *gorm.DB, redis *redis.Client) Repository {
+	return &repository{db, redis}
+}
+
+func (r *repository) WithTransaction(fn func(txRepo Repository) error) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		txRepo := &repository{
+			db:    tx,
+			redis: r.redis,
+		}
+		return fn(txRepo)
+	})
+}
+
+func (r *repository) CreateOrder(ctx context.Context, order *models.Order) error {
+	return r.db.WithContext(ctx).Create(order).Error
+}
+
+func (r *repository) GetProductByIDLocked(ctx context.Context, id string) (*models.Product, error) {
+	var product models.Product
+	if err := r.db.WithContext(ctx).Clauses(clause.Locking{Strength: "UPDATE"}).
+		First(&product, "id = ?", id).Error; err != nil {
+		return nil, err
+	}
+	return &product, nil
+}
+
+func (r *repository) CreateOrderItem(ctx context.Context, item *models.OrderItem) error {
+	return r.db.WithContext(ctx).Create(item).Error
+}
+
+func (r *repository) UpdateProductStock(ctx context.Context, id string, newStock int) error {
+	return r.db.WithContext(ctx).Model(&models.Product{}).Where("id = ?", id).Update("stock", newStock).Error
+}
+
+func (r *repository) UpdateOrderTotal(ctx context.Context, id string, total float64) error {
+	return r.db.WithContext(ctx).Model(&models.Order{}).Where("id = ?", id).Update("total_amount", total).Error
+}
+
+func (r *repository) InvalidateProductCache(ctx context.Context, productIDs []string) error {
+	// 1. Delete individual product ID keys
+	for _, id := range productIDs {
+		key := fmt.Sprintf("product:id:%s", id)
+		r.redis.Del(ctx, key)
+	}
+
+	// 2. Clear pagination keys (wildcard scan)
+	iter := r.redis.Scan(ctx, 0, "products:page:*", 0).Iterator()
+	for iter.Next(ctx) {
+		r.redis.Del(ctx, iter.Val())
+	}
+	if err := iter.Err(); err != nil {
+		return err
+	}
+	return nil
+}
