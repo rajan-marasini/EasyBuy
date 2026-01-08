@@ -1,6 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useCreateOrder } from "@/hooks/useOrder";
+import { useAuthStore } from "@/lib/auth-store";
 import { useCartStore } from "@/lib/cart-store";
 import { cn } from "@/lib/utils";
 import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
@@ -8,11 +10,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function CartPage() {
     const router = useRouter();
     const { items, removeItem, updateQuantity, getTotalPrice, clearCart } =
         useCartStore();
+    const user = useAuthStore((state) => state.user);
+
+    // React Query Mutation
+    const { mutate: createOrder, isPending: isLoading } = useCreateOrder();
 
     // Hydration guard for Next.js
     const [isHydrated, setIsHydrated] = useState(false);
@@ -24,6 +31,30 @@ export default function CartPage() {
     const tax = totalPrice * 0.1; // 10% tax
     const shipping = totalPrice > 100 ? 0 : 10; // Free shipping over $100
     const finalTotal = totalPrice + tax + shipping;
+
+    const handleCheckout = () => {
+        if (!user) {
+            toast.error("Please login to place an order");
+            router.push("/login");
+            return;
+        }
+
+        const orderData = {
+            items: items.map((item) => ({
+                productId: item.product.id,
+                quantity: item.quantity,
+            })),
+            paymentMethod: "KHALTI",
+            shippingAddress: "kathmandu",
+        };
+
+        createOrder(orderData, {
+            onSuccess: () => {
+                toast.success("Order placed successfully!");
+                clearCart();
+            },
+        });
+    };
 
     if (!isHydrated) {
         return (
@@ -241,8 +272,12 @@ export default function CartPage() {
                         <Button
                             size="lg"
                             className="w-full rounded-2xl h-14 text-lg font-bold bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-xl shadow-emerald-500/30 hover:shadow-2xl hover:shadow-emerald-500/40 transition-all duration-300 hover:scale-105 mb-3 cursor-pointer"
+                            onClick={handleCheckout}
+                            disabled={isLoading}
                         >
-                            Proceed to Checkout
+                            {isLoading
+                                ? "Processing..."
+                                : "Proceed to Checkout"}
                         </Button>
 
                         <Button
