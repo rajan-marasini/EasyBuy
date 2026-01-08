@@ -89,5 +89,11 @@ func (s *service) CreateOrder(ctx context.Context, userID string, req CreateOrde
 		_ = s.repo.InvalidateProductCache(ctx, affectedProductIDs)
 	}
 
-	return order, nil
+	// Fetch the complete order with details (User, OrderItems)
+	completeOrder, err := s.repo.GetOrderWithDetails(ctx, order.ID.String())
+	if err != nil {
+		return nil, err
+	}
+
+	return completeOrder, nil
 }

@@ -53,9 +53,14 @@ func (h *handler) CreateOrder(c *fiber.Ctx) error {
 		return fiber.NewError(http.StatusInternalServerError, err.Error())
 	}
 
+	resp := toOrderResponse(order)
+	for _, item := range order.OrderItems {
+		resp.Items = append(resp.Items, toOrderItemResponse(&item))
+	}
+
 	return c.Status(http.StatusCreated).JSON(fiber.Map{
 		"success": true,
 		"message": "Order created successfully",
-		"data":    order,
+		"data":    resp,
 	})
 }

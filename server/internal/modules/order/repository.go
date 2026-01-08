@@ -18,6 +18,7 @@ type Repository interface {
 	UpdateProductStock(ctx context.Context, id string, newStock int) error
 	UpdateOrderTotal(ctx context.Context, id string, total float64) error
 	InvalidateProductCache(ctx context.Context, productIDs []string) error
+	GetOrderWithDetails(ctx context.Context, id string) (*models.Order, error)
 }
 
 type repository struct {
@@ -80,4 +81,17 @@ func (r *repository) InvalidateProductCache(ctx context.Context, productIDs []st
 		return err
 	}
 	return nil
+}
+
+func (r *repository) GetOrderWithDetails(ctx context.Context, id string) (*models.Order, error) {
+	var order models.Order
+	if err := r.db.WithContext(ctx).
+		Preload("User").
+		Preload("OrderItems").
+		// Preload product details for the DTO mapping
+		Preload("OrderItems.Product").
+		First(&order, "id = ?", id).Error; err != nil {
+		return nil, err
+	}
+	return &order, nil
 }
