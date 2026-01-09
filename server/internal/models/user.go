@@ -19,7 +19,9 @@ type User struct {
 	Password   string `gorm:"not null" json:"password"`
 	IsVerified bool   `gorm:"default:false" json:"is_verified"`
 
+	EmailVerificationToken string     `gorm:"size:255" json:"-"`
 	EmailVerifiedAt        *time.Time `json:"email_verified_at,omitempty"`
+
 	PasswordResetToken     string     `gorm:"size:255" json:"-"`
 	PasswordResetExpiresAt *time.Time `json:"-"`
 

@@ -10,6 +10,7 @@ type Config struct {
 	PORT string `env:"PORT" envDefault:"8000"`
 
 	CLIENT_URL string `env:"CLIENT_URL" envDefault:"http://localhost:3000"`
+	API_URL    string `env:"API_URL" envDefault:"http://localhost:8000"`
 
 	DATABASE_HOST     string `env:"DATABASE_HOST" envDefault:"localhost"`
 	DATABASE_PORT     string `env:"DATABASE_PORT" envDefault:"5432"`
@@ -27,6 +28,13 @@ type Config struct {
 	CLOUDINARY_CLOUD_NAME string `env:"CLOUDINARY_CLOUD_NAME"`
 	CLOUDINARY_API_KEY    string `env:"CLOUDINARY_API_KEY"`
 	CLOUDINARY_API_SECRET string `env:"CLOUDINARY_API_SECRET"`
+
+	SMTP_HOST     string `env:"SMTP_HOST" envDefault:"smtp.gmail.com"`
+	SMTP_PORT     string `env:"SMTP_PORT" envDefault:"587"`
+	SMTP_USER     string `env:"SMTP_USER"`
+	SMTP_PASSWORD string `env:"SMTP_PASSWORD"`
+
+	TEMPLATE_PATH string `env:"TEMPLATE_PATH" envDefault:"server/internal/modules/notification/email/templates/"`
 }
 
 func Load() *Config {
