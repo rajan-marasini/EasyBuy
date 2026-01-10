@@ -3,9 +3,12 @@ package order
 import (
 	"context"
 	"errors"
+	"log"
 
 	"github.com/google/uuid"
+	"github.com/rajan-marasini/EasyBuy/server/internal/config"
 	"github.com/rajan-marasini/EasyBuy/server/internal/models"
+	"github.com/rajan-marasini/EasyBuy/server/internal/modules/notification/email"
 )
 
 type Service interface {
@@ -14,10 +17,11 @@ type Service interface {
 
 type service struct {
 	repo Repository
+	cfg  *config.Config
 }
 
-func NewService(repo Repository) Service {
-	return &service{repo}
+func NewService(repo Repository, cfg *config.Config) Service {
+	return &service{repo, cfg}
 }
 
 func (s *service) CreateOrder(ctx context.Context, userID string, req CreateOrderRequest) (*models.Order, error) {
@@ -94,6 +98,46 @@ func (s *service) CreateOrder(ctx context.Context, userID string, req CreateOrde
 	if err != nil {
 		return nil, err
 	}
+
+	// Send order confirmation email
+	go func() {
+		type EmailItem struct {
+			ProductName string
+			Quantity    int
+			Price       float64
+			Subtotal    float64
+		}
+
+		var emailItems []EmailItem
+		for _, item := range completeOrder.OrderItems {
+			emailItems = append(emailItems, EmailItem{
+				ProductName: item.Product.Name,
+				Quantity:    item.Quantity,
+				Price:       item.Price,
+				Subtotal:    item.Price * float64(item.Quantity),
+			})
+		}
+
+		emailData := map[string]any{
+			"Name":            completeOrder.User.Name,
+			"OrderID":         completeOrder.ID.String(),
+			"Items":           emailItems,
+			"TotalAmount":     completeOrder.TotalAmount,
+			"ShippingAddress": completeOrder.ShippingAddress,
+		}
+
+		emailBody, err := email.RenderTemplate("order_confirmation.tmpl", emailData)
+		if err != nil {
+			log.Println("Error rendering order confirmation email template: ", err.Error())
+			return
+		}
+
+		if err := email.SendEmail(s.cfg, completeOrder.User.Email, "Order Confirmation - "+completeOrder.ID.String(), emailBody); err != nil {
+			log.Println("Error sending order confirmation email to ", completeOrder.User.Email, ": ", err.Error())
+			return
+		}
+		log.Println("Order confirmation email sent to ", completeOrder.User.Email)
+	}()
 
 	return completeOrder, nil
 }

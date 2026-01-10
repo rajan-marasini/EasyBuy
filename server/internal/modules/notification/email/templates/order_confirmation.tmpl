@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { width: 80%; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+        .header { background-color: #f4f4f4; padding: 10px; text-align: center; border-bottom: 1px solid #ddd; }
+        .content { padding: 20px; }
+        .footer { text-align: center; font-size: 0.8em; color: #777; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 10px; border-bottom: 1px solid #ddd; text-align: left; }
+        th { background-color: #f9f9f9; }
+        .total { font-weight: bold; font-size: 1.2em; text-align: right; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Order Confirmation</h2>
+        </div>
+        <div class="content">
+            <p>Hello {{.Name}},</p>
+            <p>Thank you for your order! Your order has been successfully placed and is being processed.</p>
+            <p><strong>Order ID:</strong> {{.OrderID}}</p>
+            
+            <h3>Order Details:</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .Items}}
+                    <tr>
+                        <td>{{.ProductName}}</td>
+                        <td>{{.Quantity}}</td>
+                        <td>Rs.{{.Price}}</td>
+                        <td>Rs.{{printf "%.2f" .Subtotal}}</td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+            
+            <div class="total">
+                Total: Rs.{{.TotalAmount}}
+            </div>
+            
+            <p><strong>Shipping Address:</strong><br>
+            {{.ShippingAddress}}</p>
+            
+            <p>We'll notify you when your order ships.</p>
+        </div>
+        <div class="footer">
+            <p>&copy; 2026 EasyBuy. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
