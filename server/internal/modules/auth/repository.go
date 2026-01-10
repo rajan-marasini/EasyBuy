@@ -17,6 +17,7 @@ type Repository interface {
 	FindByEmail(email string) (*models.User, error)
 	FindByID(id string) (*models.User, error)
 	UpdateLoginTime(id string) error
+	VerifyEmailToken(token, email string) (*models.User, error)
 }
 
 type repository struct {
@@ -116,4 +117,36 @@ func (r *repository) FindByID(id string) (*models.User, error) {
 	}
 
 	return &user, nil
+}
+
+func (r *repository) VerifyEmailToken(token, email string) (*models.User, error) {
+	user, err := r.FindByEmail(email)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, fmt.Errorf("user not found")
+	}
+
+	log.Println("Email verification token for", email, "is", user.EmailVerificationToken)
+	log.Println("Provided token is", token)
+
+	if user.EmailVerificationToken == "" || user.EmailVerificationToken != token {
+		return nil, fmt.Errorf("invalid verification token")
+	}
+
+	if err := r.db.Model(&models.User{}).Where("id=?", user.ID).Updates(map[string]interface{}{
+		"is_verified":              true,
+		"email_verified_at":        time.Now(),
+		"email_verification_token": "",
+	}).Error; err != nil {
+		return nil, err
+	}
+
+	// Invalidate cache
+	ctx := context.Background()
+	r.redis.Del(ctx, fmt.Sprintf("user:id:%s", user.ID))
+	r.redis.Del(ctx, fmt.Sprintf("user:email:%s", user.Email))
+
+	return user, nil
 }

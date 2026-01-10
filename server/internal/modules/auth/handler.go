@@ -14,6 +14,7 @@ type Handler interface {
 	LoginUser(c *fiber.Ctx) error
 	LogoutUser(c *fiber.Ctx) error
 	GetProfile(c *fiber.Ctx) error
+	VerifyEmail(c *fiber.Ctx) error
 }
 
 type handler struct {
@@ -125,4 +126,19 @@ func (h *handler) GetProfile(c *fiber.Ctx) error {
 		"message": "User profile fetched successfully",
 		"data":    res,
 	})
+}
+
+func (h *handler) VerifyEmail(c *fiber.Ctx) error {
+	token := c.Query("token")
+	email := c.Query("email")
+
+	if token == "" || email == "" {
+		return fiber.NewError(400, "Invalid verification link")
+	}
+	err := h.serv.VerifyEmail(token, email)
+	if err != nil {
+		return err
+	}
+
+	return c.Redirect(h.cfg.CLIENT_URL, http.StatusSeeOther)
 }

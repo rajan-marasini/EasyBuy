@@ -19,11 +19,11 @@ type User struct {
 	Password   string `gorm:"not null" json:"password"`
 	IsVerified bool   `gorm:"default:false" json:"is_verified"`
 
-	EmailVerificationToken string     `gorm:"size:255" json:"-"`
+	EmailVerificationToken string     `gorm:"size:500" json:"email_verification_token"`
 	EmailVerifiedAt        *time.Time `json:"email_verified_at,omitempty"`
 
-	PasswordResetToken     string     `gorm:"size:255" json:"-"`
-	PasswordResetExpiresAt *time.Time `json:"-"`
+	PasswordResetToken     string     `gorm:"size:255" json:"password_reset_token"`
+	PasswordResetExpiresAt *time.Time `json:"password_reset_expires_at,omitempty"`
 
 	// Role & Status
 	Role   string `gorm:"size:20;default:user" json:"role"` // user, admin
@@ -32,7 +32,7 @@ type User struct {
 	// Timestamps
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"deleted_at,omitempty"`
 
 	LastLoginAt *time.Time `json:"last_login_at,omitempty"`
 

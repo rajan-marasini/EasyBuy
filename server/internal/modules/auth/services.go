@@ -1,9 +1,13 @@
 package auth
 
 import (
+	"log"
+
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"github.com/rajan-marasini/EasyBuy/server/internal/config"
 	"github.com/rajan-marasini/EasyBuy/server/internal/models"
+	"github.com/rajan-marasini/EasyBuy/server/internal/modules/notification/email"
 	"github.com/rajan-marasini/EasyBuy/server/internal/utils"
 )
 
@@ -11,6 +15,7 @@ type Service interface {
 	RegisterUser(req UserRegisterRequest) (*UserRegisterResponse, error)
 	LoginUser(req UserLoginRequest) (*UserLoginResponse, error)
 	GetUserProfile(userID string) (*UserRegisterResponse, error)
+	VerifyEmail(token, email string) error
 }
 
 type service struct {
@@ -37,15 +42,34 @@ func (s *service) RegisterUser(req UserRegisterRequest) (*UserRegisterResponse, 
 		return nil, err
 	}
 
+	token := uuid.New().String()
+
 	user := &models.User{
-		Name:     req.Name,
-		Email:    req.Email,
-		Password: hashedPassword,
+		Name:                   req.Name,
+		Email:                  req.Email,
+		Password:               hashedPassword,
+		EmailVerificationToken: token,
 	}
 	createdUser, err := s.repo.Create(user)
 	if err != nil {
 		return nil, err
 	}
+
+	verifyURL := s.cfg.API_URL + "/auth/verify-email?token=" + token + "&email=" + createdUser.Email
+	emailBody, err := email.RenderTemplate("verify_email.tmpl", map[string]string{
+		"Name":                  createdUser.Name,
+		"EmailVerificationLink": verifyURL,
+	})
+	if err != nil {
+		log.Println("Error rendering email template: ", err.Error())
+	}
+	go func() {
+		if err = email.SendEmail(s.cfg, createdUser.Email, "Verify your email", emailBody); err != nil {
+			log.Println("Error sending email to ", createdUser.Email, ": ", err.Error())
+			return
+		}
+		log.Println("Verification email sent to ", createdUser.Email)
+	}()
 
 	return &UserRegisterResponse{
 		ID:    createdUser.ID.String(),
@@ -79,11 +103,12 @@ func (s *service) LoginUser(req UserLoginRequest) (*UserLoginResponse, error) {
 	}
 
 	return &UserLoginResponse{
-		ID:    user.ID.String(),
-		Name:  user.Name,
-		Email: user.Email,
-		Role:  user.Role,
-		Token: token,
+		ID:         user.ID.String(),
+		Name:       user.Name,
+		Email:      user.Email,
+		Role:       user.Role,
+		Token:      token,
+		IsVerified: user.IsVerified,
 	}, nil
 }
 
@@ -102,4 +127,27 @@ func (s *service) GetUserProfile(userID string) (*UserRegisterResponse, error) {
 		Email: user.Email,
 		Role:  user.Role,
 	}, nil
+}
+
+func (s *service) VerifyEmail(token, email string) error {
+	if token == "" || email == "" {
+		return fiber.NewError(400, "Invalid verification link")
+	}
+
+	user, err := s.repo.FindByEmail(email)
+	if err != nil {
+		return err
+	}
+	if user == nil {
+		return fiber.NewError(400, "Invalid token or email")
+	}
+
+	if user.IsVerified {
+		return fiber.NewError(400, "Email already verified")
+	}
+
+	if _, err := s.repo.VerifyEmailToken(token, email); err != nil {
+		return fiber.NewError(400, "Invalid verification token", err.Error())
+	}
+	return nil
 }

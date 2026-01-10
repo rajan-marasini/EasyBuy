@@ -19,9 +19,10 @@ type UserLoginRequest struct {
 }
 
 type UserLoginResponse struct {
-	ID    string `json:"id"`
-	Name  string `json:"name"`
-	Token string `json:"-"`
-	Email string `json:"email"`
-	Role  string `json:"role"`
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	Token      string `json:"-"`
+	Email      string `json:"email"`
+	Role       string `json:"role"`
+	IsVerified bool   `json:"is_verified"`
 }
