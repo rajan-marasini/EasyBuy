@@ -1,5 +1,6 @@
 "use client";
 
+import { CheckoutDialog } from "@/components/cart/CheckoutDialog";
 import { Button } from "@/components/ui/button";
 import { useCreateOrder } from "@/hooks/useOrder";
 import { useAuthStore } from "@/lib/auth-store";
@@ -21,10 +22,12 @@ export default function CartPage() {
     // React Query Mutation
     const { mutate: createOrder, isPending: isLoading } = useCreateOrder();
 
-    // Hydration guard for Next.js
     const [isHydrated, setIsHydrated] = useState(false);
+    const [isCheckoutDialogOpen, setIsCheckoutDialogOpen] = useState(false);
     useEffect(() => {
-        setIsHydrated(true);
+        (() => {
+            setIsHydrated(true);
+        })();
     }, []);
 
     const totalPrice = getTotalPrice();
@@ -38,20 +41,31 @@ export default function CartPage() {
             router.push("/login");
             return;
         }
+        setIsCheckoutDialogOpen(true);
+    };
 
-        const orderData = {
+    const handleConfirmCheckout = (orderData: {
+        paymentMethod: string;
+        shippingAddress: string;
+    }) => {
+        const fullOrderData = {
             items: items.map((item) => ({
                 productId: item.product.id,
                 quantity: item.quantity,
             })),
-            paymentMethod: "KHALTI",
-            shippingAddress: "kathmandu",
+            ...orderData,
         };
 
-        createOrder(orderData, {
+        createOrder(fullOrderData, {
             onSuccess: () => {
                 toast.success("Order placed successfully!");
                 clearCart();
+                setIsCheckoutDialogOpen(false);
+            },
+            onError: (error: any) => {
+                toast.error(
+                    error?.response?.data?.message || "Failed to place order"
+                );
             },
         });
     };
@@ -291,6 +305,13 @@ export default function CartPage() {
                     </div>
                 </div>
             </div>
+
+            <CheckoutDialog
+                isOpen={isCheckoutDialogOpen}
+                onClose={() => setIsCheckoutDialogOpen(false)}
+                onConfirm={handleConfirmCheckout}
+                isLoading={isLoading}
+            />
         </div>
     );
 }
