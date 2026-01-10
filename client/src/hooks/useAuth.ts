@@ -37,7 +37,6 @@ export function useAuth() {
         },
         onError: (error: any) => {
             toast.error(error.response?.data?.message || "Logout failed");
-            // Still clear local state even if server call fails
             useAuthStore.getState().logout();
             router.push("/login");
         },
@@ -57,9 +56,42 @@ export function useAuth() {
         },
     });
 
+    const forgotPasswordMutation = useMutation({
+        mutationFn: async (email: string) => {
+            const { data } = await api.post("/auth/forgot-password", { email });
+            return data;
+        },
+        onSuccess: (response) => {
+            toast.success(response.message || "OTP sent to your email");
+        },
+        onError: (error: any) => {
+            toast.error(
+                error.response?.data?.message || "Failed to send reset link"
+            );
+        },
+    });
+
+    const resetPasswordMutation = useMutation({
+        mutationFn: async (resetData: any) => {
+            const { data } = await api.post("/auth/reset-password", resetData);
+            return data;
+        },
+        onSuccess: (response) => {
+            toast.success(response.message || "Password reset successful");
+            router.push("/login");
+        },
+        onError: (error: any) => {
+            toast.error(
+                error.response?.data?.message || "Failed to reset password"
+            );
+        },
+    });
+
     return {
         login: loginMutation,
         logout: logoutMutation,
         signup: signupMutation,
+        forgotPassword: forgotPasswordMutation,
+        resetPassword: resetPasswordMutation,
     };
 }

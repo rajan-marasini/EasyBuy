@@ -1,5 +1,6 @@
 "use client";
 
+import { ForgotPasswordDialog } from "@/components/auth/ForgotPasswordDialog";
 import { Button } from "@/components/ui/button";
 import {
     Form,
@@ -105,12 +106,7 @@ export default function LoginPage() {
                         />
 
                         <div className="flex justify-end">
-                            <Link
-                                href="/forgot-password"
-                                className="text-sm font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-500 dark:hover:text-emerald-400 transition-colors"
-                            >
-                                Forgot Password?
-                            </Link>
+                            <ForgotPasswordDialog />
                         </div>
 
                         <Button
