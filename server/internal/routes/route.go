@@ -31,5 +31,4 @@ func RegisterRoutes(app *app.AppWrapper) {
 
 	orderGroup := v1.Group("/orders")
 	order.RegisterOrderRoute(orderGroup, app)
-
 }

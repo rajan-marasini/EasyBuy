@@ -8,7 +8,7 @@ import (
 
 func RegisterOrderRoute(router fiber.Router, app *app.AppWrapper) {
 	repo := NewRepository(app.DB, app.Redis)
-	serv := NewService(repo, app.Config)
+	serv := NewService(repo, app.Config, app.Notification)
 	handler := NewHandler(serv, app.Config)
 
 	router.Post("/", middleware.IsAuthenticated(app.Config), handler.CreateOrder)

@@ -1,12 +1,14 @@
 package auth
 
 import (
+	"context"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/rajan-marasini/EasyBuy/server/internal/config"
 	"github.com/rajan-marasini/EasyBuy/server/internal/models"
+	"github.com/rajan-marasini/EasyBuy/server/internal/modules/notification"
 	"github.com/rajan-marasini/EasyBuy/server/internal/modules/notification/email"
 	"github.com/rajan-marasini/EasyBuy/server/internal/utils"
 )
@@ -21,12 +23,13 @@ type Service interface {
 }
 
 type service struct {
-	repo Repository
-	cfg  *config.Config
+	repo   Repository
+	cfg    *config.Config
+	notify notification.NotificationService
 }
 
-func NewService(repo Repository, cfg *config.Config) Service {
-	return &service{repo, cfg}
+func NewService(repo Repository, cfg *config.Config, notify notification.NotificationService) Service {
+	return &service{repo, cfg, notify}
 }
 
 func (s *service) RegisterUser(req UserRegisterRequest) (*UserRegisterResponse, error) {
@@ -65,13 +68,8 @@ func (s *service) RegisterUser(req UserRegisterRequest) (*UserRegisterResponse, 
 	if err != nil {
 		log.Println("Error rendering email template: ", err.Error())
 	}
-	go func() {
-		if err = email.SendEmail(s.cfg, createdUser.Email, "Verify your email", emailBody); err != nil {
-			log.Println("Error sending email to ", createdUser.Email, ": ", err.Error())
-			return
-		}
-		log.Println("Verification email sent to ", createdUser.Email)
-	}()
+
+	_ = s.notify.SendEmail(context.Background(), createdUser.Email, "Verify your email", emailBody)
 
 	return &UserRegisterResponse{
 		ID:    createdUser.ID.String(),
@@ -176,13 +174,7 @@ func (s *service) ForgotPassword(emailStr string) error {
 		log.Println("Error rendering email template: ", err.Error())
 	}
 
-	go func() {
-		if err = email.SendEmail(s.cfg, user.Email, "Reset your password", emailBody); err != nil {
-			log.Println("Error sending email to ", user.Email, ": ", err.Error())
-			return
-		}
-		log.Println("Password reset OTP sent to ", user.Email)
-	}()
+	_ = s.notify.SendEmail(context.Background(), user.Email, "Reset your password", emailBody)
 
 	return nil
 }
@@ -212,12 +204,9 @@ func (s *service) ResetPassword(req ResetPasswordRequest) error {
 			"Name": user.Name,
 		})
 		if err == nil {
-			go func() {
-				if err := email.SendEmail(s.cfg, user.Email, "Password Reset Successful", emailBody); err != nil {
-					log.Println("Error sending password reset confirmation email to", user.Email, ":", err.Error())
-				}
-			}()
+			_ = s.notify.SendEmail(context.Background(), user.Email, "Password Reset Successful", emailBody)
 		}
+
 	}
 
 	return nil

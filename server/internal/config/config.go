@@ -25,6 +25,8 @@ type Config struct {
 	REDIS_PASSWORD string `env:"REDIS_PASSWORD" envDefault:""`
 	REDIS_DB       string `env:"REDIS_DB" envDefault:""`
 
+	RABBITMQ_URL string `env:"RABBITMQ_URL" envDefault:"amqp://guest:guest@localhost:5672/"`
+
 	CLOUDINARY_CLOUD_NAME string `env:"CLOUDINARY_CLOUD_NAME"`
 	CLOUDINARY_API_KEY    string `env:"CLOUDINARY_API_KEY"`
 	CLOUDINARY_API_SECRET string `env:"CLOUDINARY_API_SECRET"`
@@ -33,8 +35,6 @@ type Config struct {
 	SMTP_PORT     string `env:"SMTP_PORT" envDefault:"587"`
 	SMTP_USER     string `env:"SMTP_USER"`
 	SMTP_PASSWORD string `env:"SMTP_PASSWORD"`
-
-	TEMPLATE_PATH string `env:"TEMPLATE_PATH" envDefault:"server/internal/modules/notification/email/templates/"`
 }
 
 func Load() *Config {

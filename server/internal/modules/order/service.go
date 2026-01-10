@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/rajan-marasini/EasyBuy/server/internal/config"
 	"github.com/rajan-marasini/EasyBuy/server/internal/models"
+	"github.com/rajan-marasini/EasyBuy/server/internal/modules/notification"
 	"github.com/rajan-marasini/EasyBuy/server/internal/modules/notification/email"
 )
 
@@ -16,12 +17,13 @@ type Service interface {
 }
 
 type service struct {
-	repo Repository
-	cfg  *config.Config
+	repo   Repository
+	cfg    *config.Config
+	notify notification.NotificationService
 }
 
-func NewService(repo Repository, cfg *config.Config) Service {
-	return &service{repo, cfg}
+func NewService(repo Repository, cfg *config.Config, notify notification.NotificationService) Service {
+	return &service{repo, cfg, notify}
 }
 
 func (s *service) CreateOrder(ctx context.Context, userID string, req CreateOrderRequest) (*models.Order, error) {
@@ -132,11 +134,7 @@ func (s *service) CreateOrder(ctx context.Context, userID string, req CreateOrde
 			return
 		}
 
-		if err := email.SendEmail(s.cfg, completeOrder.User.Email, "Order Confirmation - "+completeOrder.ID.String(), emailBody); err != nil {
-			log.Println("Error sending order confirmation email to ", completeOrder.User.Email, ": ", err.Error())
-			return
-		}
-		log.Println("Order confirmation email sent to ", completeOrder.User.Email)
+		_ = s.notify.SendEmail(context.Background(), completeOrder.User.Email, "Order Confirmation - "+completeOrder.ID.String(), emailBody)
 	}()
 
 	return completeOrder, nil

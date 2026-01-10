@@ -11,7 +11,11 @@ import (
 	"github.com/rajan-marasini/EasyBuy/server/internal/app"
 	"github.com/rajan-marasini/EasyBuy/server/internal/config"
 	"github.com/rajan-marasini/EasyBuy/server/internal/database"
+	"github.com/rajan-marasini/EasyBuy/server/internal/modules/notification"
+	"github.com/rajan-marasini/EasyBuy/server/internal/queue"
+
 	"github.com/rajan-marasini/EasyBuy/server/internal/routes"
+	"github.com/rajan-marasini/EasyBuy/server/internal/worker"
 )
 
 func init() {
@@ -30,7 +34,18 @@ func main() {
 	database.Migrate(db)
 	rdb := database.ConnectRedis(cfg)
 
-	app := app.NewFiberApp(cfg, db, rdb)
+	rabbit, err := queue.NewRabbitMQ(cfg)
+	if err != nil {
+		log.Fatal("[RabbitMQ Error]:", err.Error())
+	}
+	defer rabbit.Close()
+
+	notificationService := notification.NewNotificationService(rabbit)
+
+	emailWorker := worker.NewEmailWorker(rabbit, cfg)
+	emailWorker.Start()
+
+	app := app.NewFiberApp(cfg, db, rdb, rabbit, notificationService)
 
 	routes.RegisterRoutes(app)
 
