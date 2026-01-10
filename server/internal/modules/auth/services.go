@@ -16,6 +16,8 @@ type Service interface {
 	LoginUser(req UserLoginRequest) (*UserLoginResponse, error)
 	GetUserProfile(userID string) (*UserRegisterResponse, error)
 	VerifyEmail(token, email string) error
+	ForgotPassword(email string) error
+	ResetPassword(req ResetPasswordRequest) error
 }
 
 type service struct {
@@ -149,5 +151,74 @@ func (s *service) VerifyEmail(token, email string) error {
 	if _, err := s.repo.VerifyEmailToken(token, email); err != nil {
 		return fiber.NewError(400, "Invalid verification token", err.Error())
 	}
+	return nil
+}
+
+func (s *service) ForgotPassword(emailStr string) error {
+	user, err := s.repo.FindByEmail(emailStr)
+	if err != nil {
+		return err
+	}
+	if user == nil {
+		return fiber.NewError(404, "User not found")
+	}
+
+	otp := utils.GenerateOTP(6)
+	if err := s.repo.SetPasswordResetOTP(emailStr, otp); err != nil {
+		return err
+	}
+
+	emailBody, err := email.RenderTemplate("forgot_password.tmpl", map[string]string{
+		"Name": user.Name,
+		"OTP":  otp,
+	})
+	if err != nil {
+		log.Println("Error rendering email template: ", err.Error())
+	}
+
+	go func() {
+		if err = email.SendEmail(s.cfg, user.Email, "Reset your password", emailBody); err != nil {
+			log.Println("Error sending email to ", user.Email, ": ", err.Error())
+			return
+		}
+		log.Println("Password reset OTP sent to ", user.Email)
+	}()
+
+	return nil
+}
+
+func (s *service) ResetPassword(req ResetPasswordRequest) error {
+	savedOTP, err := s.repo.GetPasswordResetOTP(req.Email)
+	if err != nil {
+		return fiber.NewError(400, err.Error())
+	}
+
+	if savedOTP != req.OTP {
+		return fiber.NewError(400, "Invalid OTP")
+	}
+
+	hashedPassword, err := utils.HashPassword(req.Password)
+	if err != nil {
+		return err
+	}
+
+	if err := s.repo.UpdatePassword(req.Email, hashedPassword); err != nil {
+		return err
+	}
+
+	user, err := s.repo.FindByEmail(req.Email)
+	if err == nil && user != nil {
+		emailBody, err := email.RenderTemplate("password_reset_success.tmpl", map[string]string{
+			"Name": user.Name,
+		})
+		if err == nil {
+			go func() {
+				if err := email.SendEmail(s.cfg, user.Email, "Password Reset Successful", emailBody); err != nil {
+					log.Println("Error sending password reset confirmation email to", user.Email, ":", err.Error())
+				}
+			}()
+		}
+	}
+
 	return nil
 }

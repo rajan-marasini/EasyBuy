@@ -26,3 +26,13 @@ type UserLoginResponse struct {
 	Role       string `json:"role"`
 	IsVerified bool   `json:"is_verified"`
 }
+
+type ForgotPasswordRequest struct {
+	Email string `json:"email" validate:"required,email"`
+}
+
+type ResetPasswordRequest struct {
+	Email    string `json:"email" validate:"required,email"`
+	OTP      string `json:"otp" validate:"required,len=6"`
+	Password string `json:"password" validate:"required,min=6"`
+}

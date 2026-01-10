@@ -17,5 +17,6 @@ func RegisterAuthRoute(router fiber.Router, app *app.AppWrapper) {
 
 	router.Get("/me", middleware.IsAuthenticated(app.Config), handler.GetProfile)
 	router.Get("/verify-email", handler.VerifyEmail)
-
+	router.Post("/forgot-password", handler.ForgotPassword)
+	router.Post("/reset-password", handler.ResetPassword)
 }

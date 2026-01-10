@@ -15,6 +15,8 @@ type Handler interface {
 	LogoutUser(c *fiber.Ctx) error
 	GetProfile(c *fiber.Ctx) error
 	VerifyEmail(c *fiber.Ctx) error
+	ForgotPassword(c *fiber.Ctx) error
+	ResetPassword(c *fiber.Ctx) error
 }
 
 type handler struct {
@@ -141,4 +143,44 @@ func (h *handler) VerifyEmail(c *fiber.Ctx) error {
 	}
 
 	return c.Redirect(h.cfg.CLIENT_URL, http.StatusSeeOther)
+}
+
+func (h *handler) ForgotPassword(c *fiber.Ctx) error {
+	var req ForgotPasswordRequest
+	if err := c.BodyParser(&req); err != nil {
+		return fiber.NewError(400, "Bad Request")
+	}
+
+	if err := h.validator.Struct(req); err != nil {
+		return fiber.NewError(400, "Bad Request")
+	}
+
+	if err := h.serv.ForgotPassword(req.Email); err != nil {
+		return err
+	}
+
+	return c.Status(200).JSON(fiber.Map{
+		"success": true,
+		"message": "Password reset OTP sent successfully",
+	})
+}
+
+func (h *handler) ResetPassword(c *fiber.Ctx) error {
+	var req ResetPasswordRequest
+	if err := c.BodyParser(&req); err != nil {
+		return fiber.NewError(400, "Bad Request")
+	}
+
+	if err := h.validator.Struct(req); err != nil {
+		return fiber.NewError(400, "Bad Request")
+	}
+
+	if err := h.serv.ResetPassword(req); err != nil {
+		return err
+	}
+
+	return c.Status(200).JSON(fiber.Map{
+		"success": true,
+		"message": "Password reset successfully",
+	})
 }

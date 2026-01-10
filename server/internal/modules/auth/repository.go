@@ -18,6 +18,9 @@ type Repository interface {
 	FindByID(id string) (*models.User, error)
 	UpdateLoginTime(id string) error
 	VerifyEmailToken(token, email string) (*models.User, error)
+	SetPasswordResetOTP(email, otp string) error
+	GetPasswordResetOTP(email string) (string, error)
+	UpdatePassword(email, hashedPassword string) error
 }
 
 type repository struct {
@@ -149,4 +152,33 @@ func (r *repository) VerifyEmailToken(token, email string) (*models.User, error)
 	r.redis.Del(ctx, fmt.Sprintf("user:email:%s", user.Email))
 
 	return user, nil
+}
+
+func (r *repository) SetPasswordResetOTP(email, otp string) error {
+	ctx := context.Background()
+	key := fmt.Sprintf("otp:password_reset:%s", email)
+	return r.redis.Set(ctx, key, otp, 10*time.Minute).Err()
+}
+
+func (r *repository) GetPasswordResetOTP(email string) (string, error) {
+	ctx := context.Background()
+	key := fmt.Sprintf("otp:password_reset:%s", email)
+	otp, err := r.redis.Get(ctx, key).Result()
+	if err == redis.Nil {
+		return "", fmt.Errorf("OTP expired or not found")
+	}
+	return otp, err
+}
+
+func (r *repository) UpdatePassword(email, hashedPassword string) error {
+	if err := r.db.Model(&models.User{}).Where("email = ?", email).Update("password", hashedPassword).Error; err != nil {
+		return err
+	}
+
+	// Invalidate cache
+	ctx := context.Background()
+	r.redis.Del(ctx, fmt.Sprintf("user:email:%s", email))
+	// We might not have the ID here easily, but the email cache is cleared.
+	// FindByID will then fetch from DB and update ID cache.
+	return nil
 }
