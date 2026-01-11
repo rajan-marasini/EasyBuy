@@ -106,7 +106,8 @@ export default function HomeContainer() {
                                 <div className="py-10 text-center w-full">
                                     <div className="h-px bg-zinc-100 w-full mb-8" />
                                     <p className="text-zinc-400 font-bold uppercase tracking-widest text-xs">
-                                        You've reached the end of the collection
+                                        You&apos;ve reached the end of the
+                                        collection
                                     </p>
                                 </div>
                             )}

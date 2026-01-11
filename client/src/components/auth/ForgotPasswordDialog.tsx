@@ -68,7 +68,7 @@ export function ForgotPasswordDialog() {
             await forgotPassword.mutateAsync(values.email);
             setEmail(values.email);
             setStep("reset");
-        } catch (error) {
+        } catch {
             // Error is handled in useAuth mutation
         }
     };
@@ -86,7 +86,7 @@ export function ForgotPasswordDialog() {
             setStep("request");
             requestForm.reset();
             resetForm.reset();
-        } catch (error) {
+        } catch {
             // Error is handled in useAuth mutation
         }
     };

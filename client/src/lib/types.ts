@@ -31,3 +31,25 @@ export interface PaginatedProductsResponse {
     meta: PaginationMeta;
     data: Product[];
 }
+
+export interface ApiError {
+    message: string;
+    errors?: Record<string, string[]>;
+}
+
+export interface UserLoginRequest {
+    email: string;
+    password: string;
+}
+
+export interface UserRegisterRequest {
+    name: string;
+    email: string;
+    password: string;
+}
+
+export interface ResetPasswordRequest {
+    otp: string;
+    email: string;
+    password: string;
+}

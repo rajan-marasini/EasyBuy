@@ -1,5 +1,7 @@
 package auth
 
+import "time"
+
 type UserRegisterRequest struct {
 	Name     string `json:"name" validate:"required,min=2"`
 	Email    string `json:"email" validate:"required,email"`
@@ -16,6 +18,16 @@ type UserRegisterResponse struct {
 type UserLoginRequest struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required"`
+}
+
+type UserProfileResponse struct {
+	ID         string    `json:"id"`
+	Name       string    `json:"name"`
+	Email      string    `json:"email"`
+	Role       string    `json:"role"`
+	IsVerified bool      `json:"is_verified"`
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
 }
 
 type UserLoginResponse struct {

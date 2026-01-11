@@ -62,7 +62,7 @@ export default function CartPage() {
                 clearCart();
                 setIsCheckoutDialogOpen(false);
             },
-            onError: (error: any) => {
+            onError: (error:) => {
                 toast.error(
                     error?.response?.data?.message || "Failed to place order"
                 );

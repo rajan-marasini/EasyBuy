@@ -4,6 +4,7 @@ import { useAuthStore } from "@/lib/auth-store";
 import { Gift, ShoppingBag, Sparkles, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function AuthLayout({
     children,
@@ -13,9 +14,11 @@ export default function AuthLayout({
     const router = useRouter();
     const { user } = useAuthStore();
 
-    if (user) {
-        return router.push("/");
-    }
+    useEffect(() => {
+        if (user) {
+            router.push("/");
+        }
+    }, [user, router]);
 
     return (
         <div className="flex min-h-screen">

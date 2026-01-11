@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import api from "./api";
 
 export interface User {
     id: string;
@@ -13,6 +14,7 @@ interface AuthState {
     user: User | null;
     setAuth: (user: User) => void;
     logout: () => void;
+    fetchUser: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -21,6 +23,16 @@ export const useAuthStore = create<AuthState>()(
             user: null,
             setAuth: (user) => set({ user }),
             logout: () => set({ user: null }),
+            fetchUser: async () => {
+                try {
+                    const response = await api.get("/auth/me");
+                    if (response.data.success) {
+                        set({ user: response.data.data });
+                    }
+                } catch {
+                    set({ user: null });
+                }
+            },
         }),
         {
             name: "auth-storage",
