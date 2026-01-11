@@ -19,9 +19,7 @@ import (
 )
 
 func init() {
-	if err := godotenv.Load(); err != nil {
-		log.Fatal("[Error]:", err.Error())
-	}
+	_ = godotenv.Load()
 }
 
 func main() {

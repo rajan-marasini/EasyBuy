@@ -1,0 +1,8 @@
+.env
+node_modules
+tmp
+bin
+.git
+.air.toml
+Dockerfile
+docker-compose.yml
