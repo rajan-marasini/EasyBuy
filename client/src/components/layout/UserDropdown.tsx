@@ -64,7 +64,7 @@ export default function UserDropdown({ user }: UserDropdownProps) {
                     <>
                         <DropdownMenuItem asChild>
                             <Link
-                                href="/dashboard"
+                                href="/admin/dashboard"
                                 className="flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-gradient-to-r hover:from-emerald-50 hover:to-teal-50 transition-all duration-200"
                             >
                                 <LayoutDashboard className="h-4 w-4 text-emerald-600" />
