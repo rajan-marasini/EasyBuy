@@ -14,6 +14,8 @@ import (
 
 type Service interface {
 	CreateOrder(ctx context.Context, userID string, req CreateOrderRequest) (*models.Order, error)
+	GetAllOrders(ctx context.Context, limit, offset int) ([]models.Order, int64, error)
+	GetUserOrders(ctx context.Context, id string, limit, offset int) ([]models.Order, int64, error)
 }
 
 type service struct {
@@ -138,4 +140,12 @@ func (s *service) CreateOrder(ctx context.Context, userID string, req CreateOrde
 	}()
 
 	return completeOrder, nil
+}
+
+func (s *service) GetAllOrders(ctx context.Context, limit, offset int) ([]models.Order, int64, error) {
+	return s.repo.GetAllOrders(ctx, limit, offset)
+}
+
+func (s *service) GetUserOrders(ctx context.Context, id string, limit, offset int) ([]models.Order, int64, error) {
+	return s.repo.GetUserOrders(ctx, id, limit, offset)
 }

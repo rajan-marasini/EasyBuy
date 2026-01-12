@@ -68,3 +68,69 @@ func toOrderItemResponse(item *models.OrderItem) OrderItemResponse {
 		Price:       item.Price,
 	}
 }
+
+// Lightweight DTOs for list endpoints
+type OrderListUserResponse struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+type OrderListItemProductResponse struct {
+	ProductID   string  `json:"product_id"`
+	ProductName string  `json:"product_name"`
+	Quantity    int     `json:"quantity"`
+	Price       float64 `json:"price"`
+}
+
+type OrderListItemResponse struct {
+	ID              string                         `json:"id"`
+	User            OrderListUserResponse          `json:"user"`
+	TotalAmount     float64                        `json:"total_amount"`
+	PaymentStatus   string                         `json:"payment_status"`
+	PaymentMethod   string                         `json:"payment_method"`
+	OrderStatus     string                         `json:"order_status"`
+	DeliveryStatus  string                         `json:"delivery_status"`
+	ShippingAddress string                         `json:"shipping_address"`
+	Items           []OrderListItemProductResponse `json:"items"`
+	CreatedAt       string                         `json:"created_at"`
+}
+
+type PaginationMetadata struct {
+	Page       int   `json:"page"`
+	Limit      int   `json:"limit"`
+	Total      int64 `json:"total"`
+	TotalPages int   `json:"total_pages"`
+}
+
+type PaginatedOrdersResponse struct {
+	Orders     []OrderListItemResponse `json:"orders"`
+	Pagination PaginationMetadata      `json:"pagination"`
+}
+
+func toOrderListItemResponse(order *models.Order) OrderListItemResponse {
+	items := make([]OrderListItemProductResponse, 0, len(order.OrderItems))
+	for _, item := range order.OrderItems {
+		items = append(items, OrderListItemProductResponse{
+			ProductID:   item.Product.ID.String(),
+			ProductName: item.Product.Name,
+			Quantity:    item.Quantity,
+			Price:       item.Price,
+		})
+	}
+
+	return OrderListItemResponse{
+		ID:              order.ID.String(),
+		TotalAmount:     order.TotalAmount,
+		PaymentStatus:   string(order.PaymentStatus),
+		PaymentMethod:   order.PaymentMethod,
+		OrderStatus:     string(order.OrderStatus),
+		DeliveryStatus:  string(order.DeliveryStatus),
+		ShippingAddress: order.ShippingAddress,
+		CreatedAt:       order.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		User: OrderListUserResponse{
+			ID:   order.User.ID.String(),
+			Name: order.User.Name,
+		},
+		Items: items,
+	}
+}
