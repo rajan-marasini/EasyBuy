@@ -16,14 +16,14 @@ export default function NotificationDialog() {
             title: "Order Received!",
             description: "Your order has been received successfully.",
             time: "1m ago",
-            read: true,
+            read: false,
         },
         {
             id: 2,
             title: "Order Placed!",
             description: "Your order has been placed successfully.",
             time: "2m ago",
-            read: false,
+            read: true,
         },
         {
             id: 3,
