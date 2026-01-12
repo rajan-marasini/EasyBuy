@@ -16,7 +16,7 @@ import (
 type Service interface {
 	RegisterUser(req UserRegisterRequest) (*UserRegisterResponse, error)
 	LoginUser(req UserLoginRequest) (*UserLoginResponse, error)
-	GetUserProfile(userID string) (*UserProfileResponse, error)
+	GetUserProfile(userID string) (*models.User, error)
 	VerifyEmail(token, email string) error
 	ForgotPassword(email string) error
 	ResetPassword(req ResetPasswordRequest) error
@@ -112,7 +112,7 @@ func (s *service) LoginUser(req UserLoginRequest) (*UserLoginResponse, error) {
 	}, nil
 }
 
-func (s *service) GetUserProfile(userID string) (*UserProfileResponse, error) {
+func (s *service) GetUserProfile(userID string) (*models.User, error) {
 	user, err := s.repo.FindByID(userID)
 	if err != nil {
 		return nil, err
@@ -121,13 +121,7 @@ func (s *service) GetUserProfile(userID string) (*UserProfileResponse, error) {
 		return nil, fiber.NewError(404, "User not found")
 	}
 
-	return &UserProfileResponse{
-		ID:         user.ID.String(),
-		Name:       user.Name,
-		Email:      user.Email,
-		Role:       user.Role,
-		IsVerified: user.IsVerified,
-	}, nil
+	return user, nil
 }
 
 func (s *service) VerifyEmail(token, email string) error {

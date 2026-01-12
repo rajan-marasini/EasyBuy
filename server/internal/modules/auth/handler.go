@@ -142,7 +142,7 @@ func (h *handler) VerifyEmail(c *fiber.Ctx) error {
 		return err
 	}
 
-	return c.Redirect(h.cfg.CLIENT_URL, http.StatusSeeOther)
+	return c.Redirect(h.cfg.CLIENT_URL+"/login", http.StatusSeeOther)
 }
 
 func (h *handler) ForgotPassword(c *fiber.Ctx) error {

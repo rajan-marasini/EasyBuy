@@ -1,4 +1,5 @@
 import { Toaster } from "@/components/ui/sonner";
+import AuthProvider from "@/providers/AuthProvider";
 import QueryProvider from "@/providers/QueryProvider";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -31,8 +32,10 @@ export default function RootLayout({
                 suppressHydrationWarning
             >
                 <QueryProvider>
-                    {children}
-                    <Toaster position="top-center" richColors />
+                    <AuthProvider>
+                        {children}
+                        <Toaster position="top-center" richColors />
+                    </AuthProvider>
                 </QueryProvider>
             </body>
         </html>
