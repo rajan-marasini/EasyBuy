@@ -6,8 +6,18 @@ export interface User {
     id: string;
     name: string;
     email: string;
-    role: string;
+    phone?: string;
+    password?: string;
     is_verified: boolean;
+    email_verification_token?: string;
+    email_verified_at?: string;
+    password_reset_token?: string;
+    role: string;
+    status: string;
+    created_at: string;
+    updated_at: string;
+    deleted_at?: string | null;
+    last_login_at?: string;
 }
 
 interface AuthState {

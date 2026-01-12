@@ -13,7 +13,6 @@ func RegisterUserRoutes(router fiber.Router, app *app.AppWrapper) {
 
 	// Admin only routes
 	router.Use(middleware.IsAuthenticated(app.Config))
-	router.Use(middleware.IsAdmin)
 
 	router.Get("/", handler.GetAll)
 	router.Get("/:id", handler.GetByID)

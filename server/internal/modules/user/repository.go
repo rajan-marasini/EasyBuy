@@ -117,6 +117,7 @@ func (r *repository) Update(ctx context.Context, user *models.User) (*models.Use
 	if err := r.db.WithContext(ctx).Save(user).Error; err != nil {
 		return nil, err
 	}
+	r.redis.Del(ctx, fmt.Sprintf("user:id:%s", user.ID))
 	r.invalidateCache(ctx)
 	return user, nil
 }

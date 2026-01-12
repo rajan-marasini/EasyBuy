@@ -1,6 +1,10 @@
 package auth
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type UserRegisterRequest struct {
 	Name     string `json:"name" validate:"required,min=2"`
@@ -21,13 +25,17 @@ type UserLoginRequest struct {
 }
 
 type UserProfileResponse struct {
-	ID         string    `json:"id"`
-	Name       string    `json:"name"`
-	Email      string    `json:"email"`
-	Role       string    `json:"role"`
-	IsVerified bool      `json:"is_verified"`
-	CreatedAt  time.Time `json:"created_at"`
-	UpdatedAt  time.Time `json:"updated_at"`
+	ID              uuid.UUID  `json:"id"`
+	Name            string     `json:"name"`
+	Email           string     `json:"email"`
+	Phone           string     `json:"phone"`
+	Role            string     `json:"role"`
+	Status          string     `json:"status"`
+	IsVerified      bool       `json:"is_verified"`
+	EmailVerifiedAt *time.Time `json:"email_verified_at,omitempty"`
+	CreatedAt       time.Time  `json:"created_at"`
+	UpdatedAt       time.Time  `json:"updated_at"`
+	LastLoginAt     *time.Time `json:"last_login_at,omitempty"`
 }
 
 type UserLoginResponse struct {
