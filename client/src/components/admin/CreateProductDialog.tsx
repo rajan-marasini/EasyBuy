@@ -40,14 +40,8 @@ const productSchema = z.object({
     description: z
         .string()
         .min(10, "Description must be at least 10 characters"),
-    price: z
-        .string()
-        .transform((val) => parseFloat(val))
-        .pipe(z.number().min(0)),
-    stock: z
-        .string()
-        .transform((val) => parseInt(val))
-        .pipe(z.number().min(0)),
+    price: z.string(),
+    stock: z.string(),
     category_id: z.string().min(1, "Please select a category"),
     brand: z.string().min(1, "Brand is required"),
 });
@@ -64,8 +58,8 @@ export default function CreateProductDialog() {
         defaultValues: {
             name: "",
             description: "",
-            price: 0 as unknown as number,
-            stock: 0 as unknown as number,
+            price: "",
+            stock: "",
             category_id: "",
             brand: "",
         },

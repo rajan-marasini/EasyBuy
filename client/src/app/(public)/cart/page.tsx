@@ -10,8 +10,11 @@ import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { EsewaForm } from "@/components/cart/EsewaForm";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+
+const generateTransactionId = () => `ORDER-${Date.now()}`;
 
 export default function CartPage() {
     const router = useRouter();
@@ -24,6 +27,14 @@ export default function CartPage() {
 
     const [isHydrated, setIsHydrated] = useState(false);
     const [isCheckoutDialogOpen, setIsCheckoutDialogOpen] = useState(false);
+    const [showEsewaForm, setShowEsewaForm] = useState(false);
+    const [esewaData, setEsewaData] = useState<{
+        amount: string;
+        tax_amount: string;
+        total_amount: string;
+        product_delivery_charge: string;
+        transaction_uuid: string;
+    } | null>(null);
     useEffect(() => {
         (() => {
             setIsHydrated(true);
@@ -56,18 +67,38 @@ export default function CartPage() {
             ...orderData,
         };
 
-        createOrder(fullOrderData, {
-            onSuccess: () => {
-                toast.success("Order placed successfully!");
-                clearCart();
-                setIsCheckoutDialogOpen(false);
-            },
-            onError: (error: any) => {
-                toast.error(
-                    error?.response?.data?.message || "Failed to place order"
-                );
-            },
-        });
+        if (orderData.paymentMethod === "ESEWA") {
+            const transaction_uuid = generateTransactionId();
+            // Store pending order
+            localStorage.setItem(
+                "pending_order",
+                JSON.stringify(fullOrderData)
+            );
+
+            setEsewaData({
+                amount: totalPrice.toFixed(2),
+                tax_amount: tax.toFixed(2),
+                total_amount: finalTotal.toFixed(2),
+                product_delivery_charge: shipping.toFixed(2),
+                transaction_uuid: transaction_uuid,
+            });
+            setShowEsewaForm(true);
+            setIsCheckoutDialogOpen(false);
+        } else {
+            createOrder(fullOrderData, {
+                onSuccess: () => {
+                    toast.success("Order placed successfully!");
+                    clearCart();
+                    setIsCheckoutDialogOpen(false);
+                },
+                onError: (error: any) => {
+                    toast.error(
+                        error?.response?.data?.message ||
+                            "Failed to place order"
+                    );
+                },
+            });
+        }
     };
 
     if (!isHydrated) {
@@ -75,6 +106,31 @@ export default function CartPage() {
             <div className="container mx-auto px-4 py-20">
                 <div className="max-w-2xl mx-auto text-center">
                     <div className="animate-pulse bg-zinc-100 rounded-3xl h-[400px]" />
+                </div>
+            </div>
+        );
+    }
+
+    if (showEsewaForm && esewaData) {
+        return (
+            <div className="container mx-auto px-4 py-20">
+                <div className="max-w-2xl mx-auto">
+                    <Button
+                        variant="ghost"
+                        onClick={() => setShowEsewaForm(false)}
+                        className="mb-4 hover:bg-emerald-50 text-emerald-600 font-bold"
+                    >
+                        &larr; Back to Cart
+                    </Button>
+                    <EsewaForm
+                        amount={esewaData.amount}
+                        tax_amount={esewaData.tax_amount}
+                        total_amount={esewaData.total_amount}
+                        product_delivery_charge={
+                            esewaData.product_delivery_charge
+                        }
+                        transaction_uuid={esewaData.transaction_uuid}
+                    />
                 </div>
             </div>
         );
