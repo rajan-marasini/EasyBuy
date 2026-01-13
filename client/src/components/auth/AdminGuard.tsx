@@ -10,10 +10,12 @@ export default function AdminGuard({
 }: {
     children: React.ReactNode;
 }) {
-    const { user } = useAuthStore();
+    const { user, hasHydrated } = useAuthStore();
     const router = useRouter();
 
     useEffect(() => {
+        if (!hasHydrated) return;
+
         if (!user) {
             router.push("/login");
             toast.error("Login in to access admin dashboard");
@@ -21,9 +23,9 @@ export default function AdminGuard({
             router.push("/");
             toast.error("Access Denied");
         }
-    }, [user, router]);
+    }, [user, router, hasHydrated]);
 
-    if (!user || user.role !== "admin") {
+    if (!hasHydrated || !user || user.role !== "admin") {
         return (
             <div className="flex items-center justify-center min-h-screen">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>

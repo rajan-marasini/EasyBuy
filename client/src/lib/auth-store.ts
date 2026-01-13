@@ -22,9 +22,11 @@ export interface User {
 
 interface AuthState {
     user: User | null;
+    hasHydrated: boolean;
     setAuth: (user: User) => void;
     logout: () => void;
     fetchUser: () => Promise<void>;
+    setHasHydrated: (state: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -43,9 +45,16 @@ export const useAuthStore = create<AuthState>()(
                     set({ user: null });
                 }
             },
+            hasHydrated: false,
+            setHasHydrated: (state) => set({ hasHydrated: state }),
         }),
         {
             name: "auth-storage",
+            onRehydrateStorage: (state) => {
+                return () => {
+                    state.setHasHydrated(true);
+                };
+            },
         }
     )
 );
