@@ -3,13 +3,16 @@ package order
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/rajan-marasini/EasyBuy/server/internal/config"
 	"github.com/rajan-marasini/EasyBuy/server/internal/models"
 	"github.com/rajan-marasini/EasyBuy/server/internal/modules/notification"
 	"github.com/rajan-marasini/EasyBuy/server/internal/modules/notification/email"
+	"github.com/rajan-marasini/EasyBuy/server/internal/modules/payment"
 )
 
 type Service interface {
@@ -19,13 +22,14 @@ type Service interface {
 }
 
 type service struct {
-	repo   Repository
-	cfg    *config.Config
-	notify notification.NotificationService
+	repo    Repository
+	cfg     *config.Config
+	notify  notification.NotificationService
+	payment payment.Service
 }
 
-func NewService(repo Repository, cfg *config.Config, notify notification.NotificationService) Service {
-	return &service{repo, cfg, notify}
+func NewService(repo Repository, cfg *config.Config, notify notification.NotificationService, payment payment.Service) Service {
+	return &service{repo, cfg, notify, payment}
 }
 
 func (s *service) CreateOrder(ctx context.Context, userID string, req CreateOrderRequest) (*models.Order, error) {
@@ -40,6 +44,24 @@ func (s *service) CreateOrder(ctx context.Context, userID string, req CreateOrde
 		PaymentStatus:   models.PaymentPending,
 		PaymentMethod:   req.PaymentMethod,
 		ShippingAddress: req.ShippingAddress,
+	}
+
+	// For eSewa, verify payment before creating order with PAID status
+	if req.PaymentMethod == "ESEWA" {
+		if req.PaymentID == "" {
+			return nil, errors.New("payment ID is required for eSewa")
+		}
+
+		// In a real eSewa v2 flow, we'd need more details for verification
+		// But for now, we'll assume the client sends what's needed or we extract from PaymentID
+		// Let's assume req.PaymentID is the transaction UUID for now
+
+		// Note: ProductCode and TotalAmount should ideally come from our records or match the cart
+		// For simplicity, we'll derive them or use what's provided in a more complex DTO
+		// but since we don't have the full eSewa response yet, we'll just set it to paid
+		// IF the verification service (which we'll call later) returns true.
+
+		// Actually, let's calculate the total first to verify against eSewa
 	}
 
 	var affectedProductIDs []string
@@ -80,11 +102,52 @@ func (s *service) CreateOrder(ctx context.Context, userID string, req CreateOrde
 			affectedProductIDs = append(affectedProductIDs, product.ID.String())
 		}
 
-		if err := txRepo.UpdateOrderTotal(ctx, order.ID.String(), total); err != nil {
+		// Calculate final total (including tax/shipping if we had that logic on backend)
+		// For now matching frontend: 10% tax + shipping (0 if total > 100, else 10)
+		tax := total * 0.1
+		shipping := 0.0
+		if total <= 100 {
+			shipping = 10.0
+		}
+		finalTotal := total + tax + shipping
+
+		fmt.Printf("[Order] Calculated Total: %.2f (Base: %.2f, Tax: %.2f, Shipping: %.2f)\n", finalTotal, total, tax, shipping)
+
+		if err := txRepo.UpdateOrderTotal(ctx, order.ID.String(), finalTotal); err != nil {
 			return err
 		}
 
-		order.TotalAmount = total
+		order.TotalAmount = finalTotal
+
+		// Verify payment if not COD
+		if req.PaymentMethod == "ESEWA" {
+			verifyReq := payment.VerifyEsewaRequest{
+				TotalAmount:     fmt.Sprintf("%.2f", finalTotal),
+				TransactionUUID: req.PaymentID,
+				ProductCode:     s.cfg.ESEWA_PRODUCT_CODE,
+			}
+
+			fmt.Printf("[Order] Requesting eSewa Verification: %+v\n", verifyReq)
+
+			success, err := s.payment.VerifyEsewa(ctx, verifyReq)
+			if err != nil || !success {
+				fmt.Printf("[Order] eSewa Verification Failed. Error: %v, Success: %v\n", err, success)
+				return errors.New("payment verification failed")
+			}
+
+			order.PaymentStatus = models.PaymentCompleted
+			order.OrderStatus = models.OrderPaid
+			order.TransactionID = req.PaymentID
+			now := time.Now()
+			order.PaidAt = &now
+
+			// Update the created order record with payment info
+			// We can use the txRepo to update these specific fields
+			if err := txRepo.UpdateOrderPaymentInfo(ctx, order.ID.String(), string(models.PaymentCompleted), string(models.OrderPaid), req.PaymentID, &now); err != nil {
+				return err
+			}
+		}
+
 		return nil
 	})
 

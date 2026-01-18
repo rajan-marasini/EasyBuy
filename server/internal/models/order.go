@@ -46,8 +46,8 @@ type Order struct {
 
 	PaymentStatus PaymentStatus `gorm:"type:varchar(50);not null;default:'PENDING'" json:"payment_status"`
 	PaymentMethod string        `gorm:"size:50;not null" json:"payment_method"` // COD, KHALTI, STRIPE
-
-	PaidAt *time.Time `json:"paid_at"`
+	TransactionID string        `gorm:"size:100" json:"transaction_id"`
+	PaidAt        *time.Time    `json:"paid_at"`
 
 	OrderStatus    OrderStatus    `gorm:"type:varchar(50);not null;default:'PENDING'" json:"order_status"`
 	DeliveryStatus DeliveryStatus `gorm:"type:varchar(50);not null;default:'NOT_SHIPPED'" json:"delivery_status"`

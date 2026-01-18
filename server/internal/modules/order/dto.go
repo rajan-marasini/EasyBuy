@@ -9,6 +9,7 @@ type CreateOrderRequest struct {
 	} `json:"items" validate:"required,min=1,dive"`
 	PaymentMethod   string `json:"paymentMethod" validate:"required,oneof=COD KHALTI ESEWA"`
 	ShippingAddress string `json:"shippingAddress" validate:"required"`
+	PaymentID       string `json:"paymentId"` // For eSewa/Khalti verification
 }
 
 type OrderItemResponse struct {

@@ -24,6 +24,7 @@ type Repository interface {
 	GetOrderWithDetails(ctx context.Context, id string) (*models.Order, error)
 	GetUserOrders(ctx context.Context, id string, limit, offset int) ([]models.Order, int64, error)
 	GetAllOrders(ctx context.Context, limit, offset int) ([]models.Order, int64, error)
+	UpdateOrderPaymentInfo(ctx context.Context, id string, paymentStatus, orderStatus, transactionID string, paidAt *time.Time) error
 }
 
 type repository struct {
@@ -207,4 +208,14 @@ func (r *repository) GetUserOrders(ctx context.Context, id string, limit, offset
 	}
 
 	return orders, total, nil
+}
+
+func (r *repository) UpdateOrderPaymentInfo(ctx context.Context, id string, paymentStatus, orderStatus, transactionID string, paidAt *time.Time) error {
+	updates := map[string]interface{}{
+		"payment_status": paymentStatus,
+		"order_status":   orderStatus,
+		"transaction_id": transactionID,
+		"paid_at":        paidAt,
+	}
+	return r.db.WithContext(ctx).Model(&models.Order{}).Where("id = ?", id).Updates(updates).Error
 }

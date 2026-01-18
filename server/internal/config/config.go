@@ -31,6 +31,9 @@ type Config struct {
 	CLOUDINARY_API_KEY    string `env:"CLOUDINARY_API_KEY"`
 	CLOUDINARY_API_SECRET string `env:"CLOUDINARY_API_SECRET"`
 
+	ESEWA_PRODUCT_CODE string `env:"ESEWA_PRODUCT_CODE" envDefault:"EPAYTEST"`
+	ESEWA_SECRET_KEY   string `env:"ESEWA_SECRET_KEY" envDefault:"8gBm/:&EnhH.1/q"`
+
 	SMTP_HOST     string `env:"SMTP_HOST" envDefault:"smtp.gmail.com"`
 	SMTP_PORT     string `env:"SMTP_PORT" envDefault:"587"`
 	SMTP_USER     string `env:"SMTP_USER"`
