@@ -51,17 +51,6 @@ func (s *service) CreateOrder(ctx context.Context, userID string, req CreateOrde
 		if req.PaymentID == "" {
 			return nil, errors.New("payment ID is required for eSewa")
 		}
-
-		// In a real eSewa v2 flow, we'd need more details for verification
-		// But for now, we'll assume the client sends what's needed or we extract from PaymentID
-		// Let's assume req.PaymentID is the transaction UUID for now
-
-		// Note: ProductCode and TotalAmount should ideally come from our records or match the cart
-		// For simplicity, we'll derive them or use what's provided in a more complex DTO
-		// but since we don't have the full eSewa response yet, we'll just set it to paid
-		// IF the verification service (which we'll call later) returns true.
-
-		// Actually, let's calculate the total first to verify against eSewa
 	}
 
 	var affectedProductIDs []string
