@@ -2,7 +2,9 @@ package notification
 
 import (
 	"context"
+	"encoding/json"
 
+	"github.com/gofiber/contrib/socketio"
 	"github.com/rajan-marasini/EasyBuy/server/internal/queue"
 )
 
@@ -31,5 +33,9 @@ func (s *notificationService) SendEmail(ctx context.Context, to, subject, body s
 }
 
 func (s *notificationService) SendRealtimeNotification(ctx context.Context, userID string, message interface{}) error {
-	return nil
+	data, err := json.Marshal(message)
+	if err != nil {
+		return err
+	}
+	return socketio.EmitTo(userID, data)
 }
