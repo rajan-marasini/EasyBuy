@@ -8,21 +8,21 @@ import (
 	"syscall"
 
 	"github.com/joho/godotenv"
+
 	"github.com/rajan-marasini/EasyBuy/server/internal/app"
 	"github.com/rajan-marasini/EasyBuy/server/internal/config"
 	"github.com/rajan-marasini/EasyBuy/server/internal/database"
 	"github.com/rajan-marasini/EasyBuy/server/internal/modules/notification"
 	"github.com/rajan-marasini/EasyBuy/server/internal/queue"
-
 	"github.com/rajan-marasini/EasyBuy/server/internal/routes"
 	"github.com/rajan-marasini/EasyBuy/server/internal/worker"
 )
 
-func init() {
-	_ = godotenv.Load()
-}
-
 func main() {
+	if err := godotenv.Load(); err != nil {
+		log.Println("[Error]:", err.Error())
+	}
+
 	cfg := config.Load()
 
 	quitChan := make(chan os.Signal, 1)
@@ -30,7 +30,12 @@ func main() {
 
 	db := database.Connect(cfg)
 	database.Migrate(db)
+
+	sqlDB, _ := db.DB()
+	defer sqlDB.Close()
+
 	rdb := database.ConnectRedis(cfg)
+	defer rdb.Close()
 
 	rabbit, err := queue.NewRabbitMQ(cfg)
 	if err != nil {
@@ -39,9 +44,8 @@ func main() {
 	defer rabbit.Close()
 
 	notificationService := notification.NewNotificationService(rabbit)
-
 	emailWorker := worker.NewEmailWorker(rabbit, cfg)
-	emailWorker.Start()
+	go emailWorker.Start()
 
 	app := app.NewFiberApp(cfg, db, rdb, rabbit, notificationService)
 
@@ -59,9 +63,9 @@ func main() {
 
 func handleGracefulShutdown(app *app.AppWrapper, quitChan chan os.Signal) {
 	<-quitChan
-	log.Println("Shutting down server...")
+	log.Println("Shutdown signal received")
 	if err := app.Shutdown(); err != nil {
-		log.Println("Error shutting the server")
+		log.Fatal("Error shutting down server:", err)
 	}
 	log.Println("Server shut down gracefully")
 }
