@@ -56,7 +56,7 @@ func (r *RabbitMQ) Close() {
 	}
 }
 
-func (r *RabbitMQ) PublishEmail(ctx context.Context, body interface{}) error {
+func (r *RabbitMQ) PublishEmail(ctx context.Context, body any) error {
 	data, err := json.Marshal(body)
 	if err != nil {
 		return err
@@ -99,7 +99,7 @@ func (r *RabbitMQ) PublishNotification(ctx context.Context, body any) error {
 		})
 
 	if err != nil {
-		log.Printf("Failed to publish email: %v", err)
+		log.Printf("Failed to publish notification: %v", err)
 		return err
 	}
 

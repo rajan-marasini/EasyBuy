@@ -50,17 +50,17 @@ func (w *NotificationWorker) Start() {
 		for d := range msgs {
 			var job queue.NotificationJob
 			if err := json.Unmarshal(d.Body, &job); err != nil {
-				log.Println("Error decoding notification job ", err.Error())
+				log.Println("Error decoding notification job:", err.Error())
 				continue
 			}
 
-			log.Println("Processing notification job for ", job.UserID)
+			log.Println("Processing notification job for:", job.UserID)
 
 			err := socketio.EmitTo(job.UserID, d.Body)
 
 			if err != nil {
 				// TODO: Imeplement dead letter queue
-				log.Println("Error sending notification to ", job.UserID)
+				log.Println("Error sending notification to:", job.UserID)
 			} else {
 				log.Println("Notification successfully sent to", job.UserID)
 			}

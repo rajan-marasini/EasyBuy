@@ -7,6 +7,7 @@ import (
 	"github.com/rajan-marasini/EasyBuy/server/internal/middleware"
 	"github.com/rajan-marasini/EasyBuy/server/internal/modules/auth"
 	"github.com/rajan-marasini/EasyBuy/server/internal/modules/category"
+	"github.com/rajan-marasini/EasyBuy/server/internal/modules/notification"
 	"github.com/rajan-marasini/EasyBuy/server/internal/modules/order"
 	"github.com/rajan-marasini/EasyBuy/server/internal/modules/payment"
 	"github.com/rajan-marasini/EasyBuy/server/internal/modules/product"
@@ -38,6 +39,9 @@ func RegisterRoutes(app *app.AppWrapper) {
 
 	paymentGroup := v1.Group("/payments")
 	payment.RegisterPaymentRoutes(paymentGroup, app)
+
+	notificationGroup := v1.Group("/notifications")
+	notification.RegisterNotificationRoute(notificationGroup, app.Config, app.Notification)
 
 	v1.Get("/ws", middleware.IsAuthenticated(app.Config), socketio.New(func(kws *socketio.Websocket) {
 		user := kws.Locals("user").(jwt.MapClaims)
