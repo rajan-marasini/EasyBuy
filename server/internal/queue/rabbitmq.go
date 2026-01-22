@@ -9,6 +9,8 @@ import (
 	"github.com/rajan-marasini/EasyBuy/server/internal/config"
 )
 
+var queues = []string{"email_queue", "notification_queue"}
+
 type RabbitMQ struct {
 	conn    *amqp.Connection
 	channel *amqp.Channel
@@ -25,16 +27,18 @@ func NewRabbitMQ(cfg *config.Config) (*RabbitMQ, error) {
 		return nil, err
 	}
 
-	_, err = ch.QueueDeclare(
-		"email_queue", // name
-		true,          // durable
-		false,         // delete when unused
-		false,         // exclusive
-		false,         // no-wait
-		nil,           // arguments
-	)
-	if err != nil {
-		return nil, err
+	for _, q := range queues {
+		_, err = ch.QueueDeclare(
+			q,     // name
+			true,  // durable
+			false, // delete when unused
+			false, // exclusive
+			false, // no-wait
+			nil,   // arguments
+		)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &RabbitMQ{
@@ -75,6 +79,32 @@ func (r *RabbitMQ) PublishEmail(ctx context.Context, body interface{}) error {
 	}
 
 	return nil
+}
+
+func (r *RabbitMQ) PublishNotification(ctx context.Context, body any) error {
+	data, err := json.Marshal(body)
+	if err != nil {
+		return err
+	}
+
+	err = r.channel.PublishWithContext(ctx,
+		"",                   // exchange
+		"notification_queue", // routing key
+		false,                // mandatory
+		false,                // immediate
+		amqp.Publishing{
+			ContentType:  "application/json",
+			Body:         data,
+			DeliveryMode: amqp.Persistent,
+		})
+
+	if err != nil {
+		log.Printf("Failed to publish email: %v", err)
+		return err
+	}
+
+	return nil
+
 }
 
 func (r *RabbitMQ) GetChannel() *amqp.Channel {

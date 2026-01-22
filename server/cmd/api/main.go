@@ -45,7 +45,10 @@ func main() {
 
 	notificationService := notification.NewNotificationService(rabbit)
 	emailWorker := worker.NewEmailWorker(rabbit, cfg)
+	notificationWorker := worker.NewNotificationWorker(rabbit, cfg)
+
 	go emailWorker.Start()
+	go notificationWorker.Start()
 
 	app := app.NewFiberApp(cfg, db, rdb, rabbit, notificationService)
 

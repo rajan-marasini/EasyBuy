@@ -2,15 +2,13 @@ package notification
 
 import (
 	"context"
-	"encoding/json"
 
-	"github.com/gofiber/contrib/socketio"
 	"github.com/rajan-marasini/EasyBuy/server/internal/queue"
 )
 
 type NotificationService interface {
 	SendEmail(ctx context.Context, to, subject, body string) error
-	SendRealtimeNotification(ctx context.Context, userID string, message interface{}) error
+	SendRealtimeNotification(ctx context.Context, userID string, message, title string) error
 }
 
 type notificationService struct {
@@ -32,10 +30,11 @@ func (s *notificationService) SendEmail(ctx context.Context, to, subject, body s
 	return s.rabbit.PublishEmail(ctx, job)
 }
 
-func (s *notificationService) SendRealtimeNotification(ctx context.Context, userID string, message interface{}) error {
-	data, err := json.Marshal(message)
-	if err != nil {
-		return err
+func (s *notificationService) SendRealtimeNotification(ctx context.Context, userID string, message, title string) error {
+	job := queue.NotificationJob{
+		UserID:  userID,
+		Title:   title,
+		Message: message,
 	}
-	return socketio.EmitTo(userID, data)
+	return s.rabbit.PublishNotification(ctx, job)
 }

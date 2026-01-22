@@ -5,3 +5,9 @@ type EmailJob struct {
 	Subject string `json:"subject"`
 	Body    string `json:"body"`
 }
+
+type NotificationJob struct {
+	UserID  string `json:"to"`
+	Title   string `json:"title"`
+	Message string `json:"message"`
+}
