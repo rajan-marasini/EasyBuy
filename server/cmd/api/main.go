@@ -43,7 +43,8 @@ func main() {
 	}
 	defer rabbit.Close()
 
-	notificationService := notification.NewNotificationService(rabbit)
+	notificationRepo := notification.NewRepository(db, rdb)
+	notificationService := notification.NewNotificationService(notificationRepo, rabbit)
 	emailWorker := worker.NewEmailWorker(rabbit, cfg)
 	notificationWorker := worker.NewNotificationWorker(rabbit, cfg)
 
