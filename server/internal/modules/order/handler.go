@@ -13,6 +13,7 @@ type Handler interface {
 	CreateOrder(c *fiber.Ctx) error
 	GetAllOrders(c *fiber.Ctx) error
 	GetUserOrders(c *fiber.Ctx) error
+	UpdateStatus(c *fiber.Ctx) error
 }
 
 type handler struct {
@@ -187,5 +188,34 @@ func (h *handler) GetUserOrders(c *fiber.Ctx) error {
 		"success": true,
 		"message": "Orders retrieved successfully",
 		"data":    response,
+	})
+}
+
+func (h *handler) UpdateStatus(c *fiber.Ctx) error {
+	id := c.Params("id")
+	var req struct {
+		OrderStatus    string `json:"order_status"`
+		DeliveryStatus string `json:"delivery_status"`
+	}
+
+	if err := c.BodyParser(&req); err != nil {
+		return fiber.NewError(http.StatusBadRequest, "Invalid request body")
+	}
+
+	if req.OrderStatus != "" {
+		if err := h.serv.UpdateOrderStatus(c.Context(), id, req.OrderStatus); err != nil {
+			return fiber.NewError(http.StatusInternalServerError, err.Error())
+		}
+	}
+
+	if req.DeliveryStatus != "" {
+		if err := h.serv.UpdateDeliveryStatus(c.Context(), id, req.DeliveryStatus); err != nil {
+			return fiber.NewError(http.StatusInternalServerError, err.Error())
+		}
+	}
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"message": "Order status updated successfully",
 	})
 }

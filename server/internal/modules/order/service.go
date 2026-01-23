@@ -19,6 +19,8 @@ type Service interface {
 	CreateOrder(ctx context.Context, userID string, req CreateOrderRequest) (*models.Order, error)
 	GetAllOrders(ctx context.Context, limit, offset int) ([]models.Order, int64, error)
 	GetUserOrders(ctx context.Context, id string, limit, offset int) ([]models.Order, int64, error)
+	UpdateOrderStatus(ctx context.Context, id string, status string) error
+	UpdateDeliveryStatus(ctx context.Context, id string, status string) error
 }
 
 type service struct {
@@ -200,4 +202,12 @@ func (s *service) GetAllOrders(ctx context.Context, limit, offset int) ([]models
 
 func (s *service) GetUserOrders(ctx context.Context, id string, limit, offset int) ([]models.Order, int64, error) {
 	return s.repo.GetUserOrders(ctx, id, limit, offset)
+}
+
+func (s *service) UpdateOrderStatus(ctx context.Context, id string, status string) error {
+	return s.repo.UpdateOrderStatus(ctx, id, status)
+}
+
+func (s *service) UpdateDeliveryStatus(ctx context.Context, id string, status string) error {
+	return s.repo.UpdateDeliveryStatus(ctx, id, status)
 }

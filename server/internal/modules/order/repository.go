@@ -25,6 +25,8 @@ type Repository interface {
 	GetUserOrders(ctx context.Context, id string, limit, offset int) ([]models.Order, int64, error)
 	GetAllOrders(ctx context.Context, limit, offset int) ([]models.Order, int64, error)
 	UpdateOrderPaymentInfo(ctx context.Context, id string, paymentStatus, orderStatus, transactionID string, paidAt *time.Time) error
+	UpdateOrderStatus(ctx context.Context, id string, status string) error
+	UpdateDeliveryStatus(ctx context.Context, id string, status string) error
 }
 
 type repository struct {
@@ -218,4 +220,31 @@ func (r *repository) UpdateOrderPaymentInfo(ctx context.Context, id string, paym
 		"paid_at":        paidAt,
 	}
 	return r.db.WithContext(ctx).Model(&models.Order{}).Where("id = ?", id).Updates(updates).Error
+}
+
+func (r *repository) UpdateOrderStatus(ctx context.Context, id string, status string) error {
+	if err := r.db.WithContext(ctx).Model(&models.Order{}).Where("id = ?", id).Update("order_status", status).Error; err != nil {
+		return err
+	}
+	return r.invalidateOrdersCache(ctx)
+}
+
+func (r *repository) UpdateDeliveryStatus(ctx context.Context, id string, status string) error {
+	if err := r.db.WithContext(ctx).Model(&models.Order{}).Where("id = ?", id).Update("delivery_status", status).Error; err != nil {
+		return err
+	}
+	return r.invalidateOrdersCache(ctx)
+}
+
+func (r *repository) invalidateOrdersCache(ctx context.Context) error {
+	// Clear all order pagination keys
+	iter := r.redis.Scan(ctx, 0, "orders:page:*", 0).Iterator()
+	for iter.Next(ctx) {
+		r.redis.Del(ctx, iter.Val())
+	}
+	iter2 := r.redis.Scan(ctx, 0, "user:orders:*", 0).Iterator()
+	for iter2.Next(ctx) {
+		r.redis.Del(ctx, iter2.Val())
+	}
+	return nil
 }

@@ -16,4 +16,5 @@ func RegisterOrderRoute(router fiber.Router, app *app.AppWrapper) {
 	router.Post("/", middleware.IsAuthenticated(app.Config), handler.CreateOrder)
 	router.Get("/", middleware.IsAuthenticated(app.Config), middleware.IsAdmin, handler.GetAllOrders)
 	router.Get("/user/:id", middleware.IsAuthenticated(app.Config), handler.GetUserOrders)
+	router.Patch("/:id/status", middleware.IsAuthenticated(app.Config), middleware.IsAdmin, handler.UpdateStatus)
 }
