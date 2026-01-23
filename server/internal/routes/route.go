@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"log"
+
 	"github.com/gofiber/contrib/socketio"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/rajan-marasini/EasyBuy/server/internal/app"
@@ -47,5 +49,8 @@ func RegisterRoutes(app *app.AppWrapper) {
 		user := kws.Locals("user").(jwt.MapClaims)
 		userID := user["id"].(string)
 		kws.SetUUID(userID)
+
+		log.Println("✅User connected: ", userID)
+
 	}))
 }

@@ -60,6 +60,7 @@ func (w *NotificationWorker) Start() {
 
 			if err != nil {
 				// TODO: Imeplement dead letter queue
+				log.Println(err.Error())
 				log.Println("Error sending notification to:", job.UserID)
 			} else {
 				log.Println("Notification successfully sent to", job.UserID)

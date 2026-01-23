@@ -9,7 +9,7 @@ import (
 
 type NotificationService interface {
 	SendEmail(ctx context.Context, to, subject, body string) error
-	SendRealtimeNotification(ctx context.Context, userID string, message, title string) error
+	SendRealtimeNotification(ctx context.Context, userID string, title, message string) error
 }
 
 type notificationService struct {
@@ -33,7 +33,7 @@ func (s *notificationService) SendEmail(ctx context.Context, to, subject, body s
 	return s.rabbit.PublishEmail(ctx, job)
 }
 
-func (s *notificationService) SendRealtimeNotification(ctx context.Context, userID string, message, title string) error {
+func (s *notificationService) SendRealtimeNotification(ctx context.Context, userID string, title, message string) error {
 	notification := models.Notification{
 		Title:   title,
 		Message: message,

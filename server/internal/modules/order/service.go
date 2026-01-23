@@ -191,6 +191,8 @@ func (s *service) CreateOrder(ctx context.Context, userID string, req CreateOrde
 		}
 
 		_ = s.notify.SendEmail(context.Background(), completeOrder.User.Email, "Order Confirmation - "+completeOrder.ID.String(), emailBody)
+
+		_ = s.notify.SendRealtimeNotification(context.Background(), completeOrder.User.ID.String(), "Order Confirmation - "+completeOrder.ID.String(), "Your order has been confirmed.")
 	}()
 
 	return completeOrder, nil
@@ -205,9 +207,23 @@ func (s *service) GetUserOrders(ctx context.Context, id string, limit, offset in
 }
 
 func (s *service) UpdateOrderStatus(ctx context.Context, id string, status string) error {
+	order, err := s.repo.GetOrderWithDetails(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	s.notify.SendRealtimeNotification(ctx, order.User.ID.String(), "Order Status Updated", "Your order status has been updated to "+status)
+
 	return s.repo.UpdateOrderStatus(ctx, id, status)
 }
 
 func (s *service) UpdateDeliveryStatus(ctx context.Context, id string, status string) error {
+	order, err := s.repo.GetOrderWithDetails(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	s.notify.SendRealtimeNotification(ctx, order.User.ID.String(), "Delivery Status Updated", "Your order delivery status has been updated to "+status)
+
 	return s.repo.UpdateDeliveryStatus(ctx, id, status)
 }
