@@ -87,6 +87,7 @@ export interface OrderPaginationMeta {
 }
 
 export interface PaginatedOrdersResponse {
+  data: unknown;
   orders: OrderListItem[];
   pagination: OrderPaginationMeta;
 }

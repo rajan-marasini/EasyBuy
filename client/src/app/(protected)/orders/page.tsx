@@ -241,7 +241,7 @@ export default function UserOrdersPage() {
               <CardContent className="p-6 space-y-4">
                 {/* Shipping Address */}
                 <div className="flex items-start gap-3 p-4 bg-zinc-50 rounded-xl border border-zinc-100">
-                  <MapPin className="w-5 h-5 text-zinc-400 mt-0.5 flex-shrink-0" />
+                  <MapPin className="w-5 h-5 text-zinc-400 mt-0.5 shrink-0" />
                   <div>
                     <p className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1">
                       Shipping Address
@@ -254,7 +254,7 @@ export default function UserOrdersPage() {
 
                 {/* Payment Method */}
                 <div className="flex items-center gap-3 p-4 bg-zinc-50 rounded-xl border border-zinc-100">
-                  <CreditCard className="w-5 h-5 text-zinc-400 flex-shrink-0" />
+                  <CreditCard className="w-5 h-5 text-zinc-400 shrink-0" />
                   <div>
                     <p className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1">
                       Payment Method
