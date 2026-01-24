@@ -8,11 +8,13 @@ import (
 	"github.com/rajan-marasini/EasyBuy/server/internal/config"
 	"github.com/rajan-marasini/EasyBuy/server/internal/modules/notification/email"
 	"github.com/rajan-marasini/EasyBuy/server/internal/queue"
+	"github.com/rajan-marasini/EasyBuy/server/internal/ws"
 )
 
 type NotificationWorker struct {
 	rabbit *queue.RabbitMQ
 	cfg    *config.Config
+	wsm    *ws.WSManager
 }
 
 type EmailWorker struct {
@@ -20,8 +22,8 @@ type EmailWorker struct {
 	cfg    *config.Config
 }
 
-func NewNotificationWorker(rabbit *queue.RabbitMQ, cfg *config.Config) *NotificationWorker {
-	return &NotificationWorker{rabbit, cfg}
+func NewNotificationWorker(rabbit *queue.RabbitMQ, cfg *config.Config, wsm *ws.WSManager) *NotificationWorker {
+	return &NotificationWorker{rabbit, cfg, wsm}
 }
 
 func NewEmailWorker(rabbit *queue.RabbitMQ, cfg *config.Config) *EmailWorker {
@@ -56,15 +58,17 @@ func (w *NotificationWorker) Start() {
 
 			log.Println("Processing notification job for:", job.UserID)
 
-			err := socketio.EmitTo(job.UserID, d.Body)
+			// Get all active socket UUIDs for this user
+			uuids := w.wsm.GetUserUUIDs(job.UserID)
 
-			if err != nil {
-				// TODO: Imeplement dead letter queue
-				log.Println(err.Error())
-				log.Println("Error sending notification to:", job.UserID)
-			} else {
-				log.Println("Notification successfully sent to", job.UserID)
+			if len(uuids) == 0 {
+				log.Printf("No active connections for user %s, notification skipped", job.UserID)
+				continue
 			}
+
+			// Emit to all of the user's active connections
+			socketio.EmitToList(uuids, d.Body)
+			log.Printf("Notification successfully sent to %d connections for user %s", len(uuids), job.UserID)
 		}
 	}()
 	log.Println("Notification Worker Started")

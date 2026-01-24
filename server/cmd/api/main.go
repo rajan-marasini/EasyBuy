@@ -16,6 +16,7 @@ import (
 	"github.com/rajan-marasini/EasyBuy/server/internal/queue"
 	"github.com/rajan-marasini/EasyBuy/server/internal/routes"
 	"github.com/rajan-marasini/EasyBuy/server/internal/worker"
+	"github.com/rajan-marasini/EasyBuy/server/internal/ws"
 )
 
 func main() {
@@ -45,13 +46,14 @@ func main() {
 
 	notificationRepo := notification.NewRepository(db, rdb)
 	notificationService := notification.NewNotificationService(notificationRepo, rabbit)
+	wsManager := ws.NewWSManager()
 	emailWorker := worker.NewEmailWorker(rabbit, cfg)
-	notificationWorker := worker.NewNotificationWorker(rabbit, cfg)
+	notificationWorker := worker.NewNotificationWorker(rabbit, cfg, wsManager)
 
 	go emailWorker.Start()
 	go notificationWorker.Start()
 
-	app := app.NewFiberApp(cfg, db, rdb, rabbit, notificationService)
+	app := app.NewFiberApp(cfg, db, rdb, rabbit, notificationService, wsManager)
 
 	routes.RegisterRoutes(app)
 

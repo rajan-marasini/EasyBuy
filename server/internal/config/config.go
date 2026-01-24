@@ -17,9 +17,9 @@ type Config struct {
 	DATABASE_NAME     string `env:"DATABASE_NAME" envDefault:"easybuy"`
 	DATABASE_USER     string `env:"DATABASE_USER" envDefault:"postgres"`
 	DATABASE_PASSWORD string `env:"DATABASE_PASSWORD" envDefault:"postgres"`
-	DATABASE_SSLMODE  string `env:"DATABASE_SSL" envDefault:"disable"`
+	DATABASE_SSLMODE  string `env:"DATABASE_SSLMODE" envDefault:"disable"`
 
-	JWT_SECRET string `env:"JWT_SECRET" envDefault:"secret"`
+	JWT_SECRET string `env:"JWT_SECRET"`
 
 	REDIS_ADDRESS  string `env:"REDIS_ADDRESS" envDefault:""`
 	REDIS_PASSWORD string `env:"REDIS_PASSWORD" envDefault:""`
@@ -31,8 +31,8 @@ type Config struct {
 	CLOUDINARY_API_KEY    string `env:"CLOUDINARY_API_KEY"`
 	CLOUDINARY_API_SECRET string `env:"CLOUDINARY_API_SECRET"`
 
-	ESEWA_PRODUCT_CODE string `env:"ESEWA_PRODUCT_CODE" envDefault:"EPAYTEST"`
-	ESEWA_SECRET_KEY   string `env:"ESEWA_SECRET_KEY" envDefault:"8gBm/:&EnhH.1/q"`
+	ESEWA_PRODUCT_CODE string `env:"ESEWA_PRODUCT_CODE"`
+	ESEWA_SECRET_KEY   string `env:"ESEWA_SECRET_KEY"`
 
 	SMTP_HOST     string `env:"SMTP_HOST" envDefault:"smtp.gmail.com"`
 	SMTP_PORT     string `env:"SMTP_PORT" envDefault:"587"`

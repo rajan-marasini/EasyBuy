@@ -48,9 +48,17 @@ func RegisterRoutes(app *app.AppWrapper) {
 	v1.Get("/ws", middleware.IsAuthenticated(app.Config), socketio.New(func(kws *socketio.Websocket) {
 		user := kws.Locals("user").(jwt.MapClaims)
 		userID := user["id"].(string)
-		kws.SetUUID(userID)
 
-		log.Println("✅User connected: ", userID)
+		// Record this connection in our manager
+		app.WSManager.Add(userID, kws.UUID)
+		log.Printf("✅ User connected: %s (Socket ID: %s)", userID, kws.UUID)
 
+		// Set a close handler to remove the connection from our manager when it's closed
+		// This handles the "socket already closed" issue by ensuring we don't try to send to dead sockets
+		kws.Conn.SetCloseHandler(func(code int, text string) error {
+			app.WSManager.Remove(userID, kws.UUID)
+			log.Printf("❌ User disconnected: %s (Socket ID: %s)", userID, kws.UUID)
+			return nil
+		})
 	}))
 }
