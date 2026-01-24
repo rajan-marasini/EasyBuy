@@ -2,6 +2,7 @@ package notification
 
 import (
 	"context"
+	"time"
 
 	"github.com/rajan-marasini/EasyBuy/server/internal/models"
 	"github.com/rajan-marasini/EasyBuy/server/internal/queue"
@@ -47,9 +48,12 @@ func (s *notificationService) SendRealtimeNotification(ctx context.Context, user
 	}
 
 	job := queue.NotificationJob{
-		UserID:  notification.UserID,
-		Title:   notification.Title,
-		Message: notification.Message,
+		ID:        notification.ID,
+		UserID:    notification.UserID,
+		Title:     notification.Title,
+		Message:   notification.Message,
+		IsRead:    notification.IsRead,
+		CreatedAt: notification.CreatedAt.Format(time.RFC3339),
 	}
 	return s.rabbit.PublishNotification(ctx, job)
 }
@@ -59,7 +63,7 @@ func (s *notificationService) GetUserNotifications(ctx context.Context, userID s
 	if err != nil {
 		return nil, err
 	}
-	var notiResp []NotificationResponse
+	notiResp := []NotificationResponse{}
 
 	for _, notification := range notifications {
 		noti := NotificationResponse{

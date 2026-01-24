@@ -39,29 +39,29 @@ func (r *repository) Create(ctx context.Context, notification *models.Notificati
 func (r *repository) GetUserNotifications(ctx context.Context, userID string) ([]models.Notification, error) {
 	cacheKey := fmt.Sprintf("user:%s:notification", userID)
 
-	var notification []models.Notification
+	notifications := []models.Notification{}
 
 	val, err := r.redis.Get(ctx, cacheKey).Result()
 	if err == nil {
-		if err := json.Unmarshal([]byte(val), &notification); err == nil {
+		if err := json.Unmarshal([]byte(val), &notifications); err == nil {
 			log.Println("Cache hit for ", cacheKey)
-			return notification, err
+			return notifications, err
 		}
 	}
 	if err := r.db.WithContext(ctx).
 		Model(models.Notification{}).
 		Where("user_id", userID).
 		Order("created_at DESC").
-		Find(&notification).Error; err != nil {
+		Find(&notifications).Error; err != nil {
 		return nil, err
 	}
 
-	notificationByte, err := json.Marshal(notification)
+	notificationByte, err := json.Marshal(notifications)
 	if err == nil {
 		r.redis.Set(ctx, cacheKey, notificationByte, time.Hour)
 	}
 
-	return notification, nil
+	return notifications, nil
 }
 
 func (r *repository) UpdateNotification(ctx context.Context, notificationID string, userID string) (*models.Notification, error) {
@@ -79,7 +79,10 @@ func (r *repository) UpdateNotification(ctx context.Context, notificationID stri
 		return nil, fmt.Errorf("notification not found or unauthorized")
 	}
 
-	if err := r.db.WithContext(ctx).First(&notification, "id = ?", notificationID).Error; err != nil {
+	if err := r.db.
+		WithContext(ctx).
+		First(&notification, "id = ?", notificationID).
+		Error; err != nil {
 		return nil, err
 	}
 

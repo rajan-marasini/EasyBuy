@@ -1,5 +1,6 @@
 "use client";
 
+import api from "@/lib/api";
 import { useAuthStore } from "@/lib/auth-store";
 import * as types from "@/lib/types";
 import {
@@ -30,6 +31,32 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef(0);
   const user = useAuthStore((state) => state.user);
+  const hasFetchedRef = useRef(false);
+
+  useEffect(() => {
+    (() => {
+      const fetchInitialNotifications = async () => {
+        if (!user || hasFetchedRef.current) return;
+
+        try {
+          const response = await api.get("/notifications");
+          if (response.data.success) {
+            setNotifications(response.data.data);
+            hasFetchedRef.current = true;
+          }
+        } catch (error) {
+          console.log("❌ Error fetching initial notifications:", error);
+        }
+      };
+
+      if (user) {
+        fetchInitialNotifications();
+      } else {
+        hasFetchedRef.current = false;
+        setNotifications([]);
+      }
+    })();
+  }, [user]);
 
   useEffect(() => {
     (() => {
@@ -63,7 +90,8 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
         }
 
         try {
-          const wsUrl = `${process.env.NEXT_PUBLIC_API_URL}/ws`;
+          const apiBase = process.env.NEXT_PUBLIC_API_URL || "";
+          const wsUrl = apiBase.replace(/^http/, "ws") + "/ws";
           console.log("🔌 Connecting to WebSocket:", wsUrl);
 
           const ws = new WebSocket(wsUrl);
@@ -79,7 +107,16 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
               const data = JSON.parse(event.data);
               console.log("📬 New notification received:", data);
 
-              setNotifications((prev) => [data, ...prev]);
+              const newNotification: types.Notification = {
+                id: data.id,
+                user_id: data.user_id,
+                title: data.title,
+                message: data.message,
+                is_read: data.is_read || false,
+                created_at: data.created_at || new Date().toISOString(),
+              };
+
+              setNotifications((prev) => [newNotification, ...prev]);
 
               // Optional: Show browser notification
               if (
@@ -97,7 +134,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
           };
 
           ws.onerror = (error) => {
-            console.error("❌ WebSocket error:", error);
+            console.log("❌ WebSocket error:", error);
             setIsConnected(false);
           };
 
@@ -154,13 +191,23 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     setNotifications((prev) => [notification, ...prev]);
   }, []);
 
-  const markAsRead = useCallback((notificationId: string) => {
-    setNotifications((prev) =>
-      prev.map((notif) =>
-        notif.id === notificationId ? { ...notif, is_read: true } : notif,
-      ),
-    );
-  }, []);
+  const markAsRead = useCallback(
+    async (notificationId: string) => {
+      try {
+        const response = await api.patch(`/notifications/${notificationId}`);
+        if (response.data.success) {
+          setNotifications((prev) =>
+            prev.map((notif) =>
+              notif.id === notificationId ? { ...notif, is_read: true } : notif,
+            ),
+          );
+        }
+      } catch (error) {
+        console.error("❌ Error marking notification as read:", error);
+      }
+    },
+    [setNotifications],
+  );
 
   const clearNotifications = useCallback(() => {
     setNotifications([]);

@@ -7,7 +7,10 @@ type EmailJob struct {
 }
 
 type NotificationJob struct {
-	UserID  string `json:"user_id"`
-	Title   string `json:"title"`
-	Message string `json:"message"`
+	ID        string `json:"id"`
+	UserID    string `json:"user_id"`
+	Title     string `json:"title"`
+	Message   string `json:"message"`
+	IsRead    bool   `json:"is_read"`
+	CreatedAt string `json:"created_at"`
 }
