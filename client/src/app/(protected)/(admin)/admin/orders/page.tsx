@@ -121,7 +121,7 @@ export default function ManageOrdersPage() {
 
   const { orders = [], pagination } = ordersData?.data || {
     orders: [],
-    pagination: { page: 1, total_pages: 1 },
+    pagination: { page: 1, total_pages: 1, limit: 10, total: 0 },
   };
 
   return (
