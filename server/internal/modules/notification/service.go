@@ -10,6 +10,8 @@ import (
 type NotificationService interface {
 	SendEmail(ctx context.Context, to, subject, body string) error
 	SendRealtimeNotification(ctx context.Context, userID string, title, message string) error
+	GetUserNotifications(ctx context.Context, userID string) ([]NotificationResponse, error)
+	UpdateNotification(ctx context.Context, notificationID string, userID string) (*NotificationResponse, error)
 }
 
 type notificationService struct {
@@ -50,4 +52,42 @@ func (s *notificationService) SendRealtimeNotification(ctx context.Context, user
 		Message: notification.Message,
 	}
 	return s.rabbit.PublishNotification(ctx, job)
+}
+
+func (s *notificationService) GetUserNotifications(ctx context.Context, userID string) ([]NotificationResponse, error) {
+	notifications, err := s.repo.GetUserNotifications(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	var notiResp []NotificationResponse
+
+	for _, notification := range notifications {
+		noti := NotificationResponse{
+			ID:        notification.ID,
+			Title:     notification.Title,
+			Message:   notification.Message,
+			IsRead:    notification.IsRead,
+			CreatedAt: notification.CreatedAt,
+		}
+		notiResp = append(notiResp, noti)
+	}
+
+	return notiResp, nil
+}
+
+func (s *notificationService) UpdateNotification(ctx context.Context, notificationID string, userID string) (*NotificationResponse, error) {
+	notification, err := s.repo.UpdateNotification(ctx, notificationID, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := NotificationResponse{
+		ID:        notification.ID,
+		Title:     notification.Title,
+		Message:   notification.Message,
+		IsRead:    notification.IsRead,
+		CreatedAt: notification.CreatedAt,
+	}
+
+	return &resp, nil
 }

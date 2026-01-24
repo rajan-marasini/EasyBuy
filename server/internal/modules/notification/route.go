@@ -10,4 +10,5 @@ func RegisterNotificationRoute(router fiber.Router, config *config.Config, notif
 	handler := NewHandler(notification)
 
 	router.Get("/", middleware.IsAuthenticated(config), handler.GetNotification)
+	router.Patch("/:id", middleware.IsAuthenticated(config), handler.UpdateNotification)
 }
