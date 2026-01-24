@@ -192,7 +192,7 @@ func (s *service) CreateOrder(ctx context.Context, userID string, req CreateOrde
 
 		_ = s.notify.SendEmail(context.Background(), completeOrder.User.Email, "Order Confirmation - "+completeOrder.ID.String(), emailBody)
 
-		_ = s.notify.SendRealtimeNotification(context.Background(), completeOrder.User.ID.String(), "Order Confirmation - "+completeOrder.ID.String(), "Your order has been confirmed.")
+		_ = s.notify.SendRealtimeNotification(context.Background(), completeOrder.User.ID.String(), "Order Confirmation", "Your order has been placed")
 	}()
 
 	return completeOrder, nil

@@ -11,6 +11,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { toast } from "sonner";
 
 interface WebSocketContextType {
   notifications: types.Notification[];
@@ -105,7 +106,8 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
           ws.onmessage = (event) => {
             try {
               const data = JSON.parse(event.data);
-              console.log("📬 New notification received:", data);
+
+              toast.info("New notification received");
 
               const newNotification: types.Notification = {
                 id: data.id,
