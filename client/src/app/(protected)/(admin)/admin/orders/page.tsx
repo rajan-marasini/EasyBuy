@@ -1,5 +1,6 @@
 "use client";
 
+import UpdateDeliveryStatusDialog from "@/components/admin/UpdateDeliveryStatusDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,12 +35,15 @@ import {
   Truck,
 } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
 
 export default function ManageOrdersPage() {
   const [page, setPage] = useState(1);
   const { data: ordersData, isLoading, isError } = useAdminOrders(page);
   const updateStatus = useUpdateOrderStatus();
+  const [selectedOrder, setSelectedOrder] = useState<OrderListItem | null>(
+    null,
+  );
+  const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
 
   const getStatusStyle = (status: string) => {
     switch (status.toLowerCase()) {
@@ -58,26 +62,6 @@ export default function ManageOrdersPage() {
       default:
         return "bg-zinc-100 text-zinc-700 font-bold";
     }
-  };
-
-  const handleUpdateStatus = (
-    id: string,
-    status: string,
-    type: "order" | "delivery",
-  ) => {
-    updateStatus.mutate(
-      { id, status, type },
-      {
-        onSuccess: () => {
-          toast.success(
-            `${type === "order" ? "Order" : "Delivery"} status updated`,
-          );
-        },
-        onError: (error: any) => {
-          toast.error(error.response?.data?.message || "Update failed");
-        },
-      },
-    );
   };
 
   if (isLoading) {
@@ -157,6 +141,9 @@ export default function ManageOrdersPage() {
                 Order Status
               </TableHead>
               <TableHead className="py-6 font-bold text-zinc-900 uppercase text-xs tracking-widest">
+                Delivery Status
+              </TableHead>
+              <TableHead className="py-6 font-bold text-zinc-900 uppercase text-xs tracking-widest">
                 Payment
               </TableHead>
               <TableHead className="text-right py-6 pr-8 font-bold text-zinc-900 uppercase text-xs tracking-widest">
@@ -202,6 +189,18 @@ export default function ManageOrdersPage() {
                   </Badge>
                 </TableCell>
                 <TableCell className="py-4">
+                  <Badge
+                    variant="secondary"
+                    className={`${getStatusStyle(
+                      order.delivery_status,
+                    )} hover:${getStatusStyle(
+                      order.delivery_status,
+                    )} border-none px-3 py-1.5 rounded-full text-[10px] shadow-sm`}
+                  >
+                    {order.delivery_status}
+                  </Badge>
+                </TableCell>
+                <TableCell className="py-4">
                   <div className="space-y-1">
                     <Badge
                       variant="secondary"
@@ -240,25 +239,17 @@ export default function ManageOrdersPage() {
                       </DropdownMenuItem>
                       <div className="h-px bg-zinc-100 my-2 mx-1" />
                       <div className="px-3 py-2 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-                        Update Status
+                        Updates
                       </div>
                       <DropdownMenuItem
-                        onClick={() =>
-                          handleUpdateStatus(order.id, "PROCESSING", "order")
-                        }
-                        className="gap-3 p-3 rounded-xl cursor-pointer focus:bg-orange-50 focus:text-orange-700 font-semibold"
-                      >
-                        <ShoppingBag className="w-4 h-4" />
-                        Processing
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() =>
-                          handleUpdateStatus(order.id, "SHIPPED", "order")
-                        }
+                        onClick={() => {
+                          setSelectedOrder(order);
+                          setIsUpdateDialogOpen(true);
+                        }}
                         className="gap-3 p-3 rounded-xl cursor-pointer focus:bg-blue-50 focus:text-blue-700 font-semibold"
                       >
                         <Truck className="w-4 h-4" />
-                        Mark Shipped
+                        Update Delivery
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -307,6 +298,12 @@ export default function ManageOrdersPage() {
           </div>
         </div>
       )}
+
+      <UpdateDeliveryStatusDialog
+        order={selectedOrder}
+        open={isUpdateDialogOpen}
+        onOpenChange={setIsUpdateDialogOpen}
+      />
     </div>
   );
 }
