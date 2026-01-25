@@ -25,7 +25,7 @@ func NewService(repo Repository) Service {
 }
 
 func (s *service) GetAllProducts(ctx context.Context, req PaginationRequest) (*PaginatedProductsResponse, error) {
-	products, total, err := s.repo.GetAllProducts(ctx, req.Page, req.Limit)
+	products, total, err := s.repo.GetAllProducts(ctx, req.Page, req.Limit, req.Search)
 	if err != nil {
 		return nil, err
 	}

@@ -13,7 +13,7 @@ import (
 )
 
 type Repository interface {
-	GetAllProducts(ctx context.Context, page, limit int) ([]models.Product, int64, error)
+	GetAllProducts(ctx context.Context, page, limit int, search string) ([]models.Product, int64, error)
 	GetByID(ctx context.Context, id string) (*models.Product, error)
 	Create(ctx context.Context, product *models.Product) (*models.Product, error)
 	Update(ctx context.Context, product *models.Product) (*models.Product, error)
@@ -34,12 +34,12 @@ type productCache struct {
 	Total    int64            `json:"total"`
 }
 
-func (r *repository) GetAllProducts(ctx context.Context, page, limit int) ([]models.Product, int64, error) {
+func (r *repository) GetAllProducts(ctx context.Context, page, limit int, search string) ([]models.Product, int64, error) {
 	var products []models.Product
 	var total int64
 
 	offset := (page - 1) * limit
-	cacheKey := fmt.Sprintf("products:page:%d:limit:%d", page, limit)
+	cacheKey := fmt.Sprintf("products:search:%s:page:%d:limit:%d", search, page, limit)
 
 	if val, err := r.redis.Get(ctx, cacheKey).Result(); err == nil {
 		var cache productCache
@@ -49,13 +49,18 @@ func (r *repository) GetAllProducts(ctx context.Context, page, limit int) ([]mod
 		}
 	}
 
-	if err := r.db.Model(&models.Product{}).Count(&total).Error; err != nil {
+	query := r.db.Model(&models.Product{})
+	if search != "" {
+		searchTerm := "%" + search + "%"
+		query = query.Where("name ILIKE ? OR description ILIKE ? OR brand ILIKE ?", searchTerm, searchTerm, searchTerm)
+	}
+
+	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	if err := r.db.
+	if err := query.
 		WithContext(ctx).
-		Model(&models.Product{}).
 		Preload("Category").
 		Limit(limit).
 		Offset(offset).
