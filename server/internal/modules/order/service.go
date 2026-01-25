@@ -48,10 +48,10 @@ func (s *service) CreateOrder(ctx context.Context, userID string, req CreateOrde
 		ShippingAddress: req.ShippingAddress,
 	}
 
-	// For eSewa, verify payment before creating order with PAID status
-	if req.PaymentMethod == "ESEWA" {
+	// For eSewa/Khalti, verify payment before creating order with PAID status
+	if req.PaymentMethod == "ESEWA" || req.PaymentMethod == "KHALTI" {
 		if req.PaymentID == "" {
-			return nil, errors.New("payment ID is required for eSewa")
+			return nil, errors.New("payment ID is required for eSewa/Khalti")
 		}
 	}
 
@@ -111,7 +111,8 @@ func (s *service) CreateOrder(ctx context.Context, userID string, req CreateOrde
 		order.TotalAmount = finalTotal
 
 		// Verify payment if not COD
-		if req.PaymentMethod == "ESEWA" {
+		switch req.PaymentMethod {
+		case "ESEWA":
 			verifyReq := payment.VerifyEsewaRequest{
 				TotalAmount:     fmt.Sprintf("%.2f", finalTotal),
 				TransactionUUID: req.PaymentID,
@@ -137,6 +138,27 @@ func (s *service) CreateOrder(ctx context.Context, userID string, req CreateOrde
 			if err := txRepo.UpdateOrderPaymentInfo(ctx, order.ID.String(), string(models.PaymentCompleted), string(models.OrderPaid), req.PaymentID, &now); err != nil {
 				return err
 			}
+		case "KHALTI":
+			verifyReq := payment.VerifyKhaltiRequest{
+				PIDX: req.PaymentID,
+			}
+
+			success, err := s.payment.VerifyKhalti(ctx, verifyReq)
+			if err != nil || !success {
+				fmt.Printf("[Order] Khalti Verification Failed. Error: %v, Success: %v\n", err, success)
+				return errors.New("payment verification failed")
+			}
+
+			order.PaymentStatus = models.PaymentCompleted
+			order.OrderStatus = models.OrderPaid
+			order.TransactionID = req.PaymentID
+			now := time.Now()
+			order.PaidAt = &now
+
+			// Update the created order record with payment info
+			if err := txRepo.UpdateOrderPaymentInfo(ctx, order.ID.String(), string(models.PaymentCompleted), string(models.OrderPaid), req.PaymentID, &now); err != nil {
+				return err
+			}
 		}
 
 		return nil
@@ -150,6 +172,7 @@ func (s *service) CreateOrder(ctx context.Context, userID string, req CreateOrde
 	if len(affectedProductIDs) > 0 {
 		_ = s.repo.InvalidateProductCache(ctx, affectedProductIDs)
 	}
+	_ = s.repo.InvalidateOrderCache(ctx)
 
 	// Fetch the complete order with details (User, OrderItems)
 	completeOrder, err := s.repo.GetOrderWithDetails(ctx, order.ID.String())

@@ -30,9 +30,12 @@ export default function PaymentSuccessPage() {
 
       const searchParams = new URLSearchParams(window.location.search);
       const dataParam = searchParams.get("data");
+      const pidxParam = searchParams.get("pidx");
 
       let paymentId = "";
-      if (dataParam) {
+      if (pidxParam) {
+        paymentId = pidxParam;
+      } else if (dataParam) {
         try {
           const decodedData = JSON.parse(atob(dataParam));
           paymentId = decodedData.transaction_uuid;

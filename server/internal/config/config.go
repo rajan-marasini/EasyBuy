@@ -33,6 +33,10 @@ type Config struct {
 
 	ESEWA_PRODUCT_CODE string `env:"ESEWA_PRODUCT_CODE"`
 	ESEWA_SECRET_KEY   string `env:"ESEWA_SECRET_KEY"`
+	ESEWA_VERIFY_URL   string `env:"ESEWA_VERIFY_URL"`
+
+	KHALTI_LIVE_SECRET_KEY string `env:"KHALTI_LIVE_SECRET_KEY"`
+	KHALTI_VERIFY_URL      string `env:"KHALTI_VERIFY_URL"`
 
 	SMTP_HOST     string `env:"SMTP_HOST" envDefault:"smtp.gmail.com"`
 	SMTP_PORT     string `env:"SMTP_PORT" envDefault:"587"`

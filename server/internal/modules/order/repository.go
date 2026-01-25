@@ -21,6 +21,7 @@ type Repository interface {
 	UpdateProductStock(ctx context.Context, id string, newStock int) error
 	UpdateOrderTotal(ctx context.Context, id string, total float64) error
 	InvalidateProductCache(ctx context.Context, productIDs []string) error
+	InvalidateOrderCache(ctx context.Context) error
 	GetOrderWithDetails(ctx context.Context, id string) (*models.Order, error)
 	GetUserOrders(ctx context.Context, id string, limit, offset int) ([]models.Order, int64, error)
 	GetAllOrders(ctx context.Context, limit, offset int) ([]models.Order, int64, error)
@@ -226,17 +227,17 @@ func (r *repository) UpdateOrderStatus(ctx context.Context, id string, status st
 	if err := r.db.WithContext(ctx).Model(&models.Order{}).Where("id = ?", id).Update("order_status", status).Error; err != nil {
 		return err
 	}
-	return r.invalidateOrdersCache(ctx)
+	return r.InvalidateOrderCache(ctx)
 }
 
 func (r *repository) UpdateDeliveryStatus(ctx context.Context, id string, status string) error {
 	if err := r.db.WithContext(ctx).Model(&models.Order{}).Where("id = ?", id).Update("delivery_status", status).Error; err != nil {
 		return err
 	}
-	return r.invalidateOrdersCache(ctx)
+	return r.InvalidateOrderCache(ctx)
 }
 
-func (r *repository) invalidateOrdersCache(ctx context.Context) error {
+func (r *repository) InvalidateOrderCache(ctx context.Context) error {
 	// Clear all order pagination keys
 	iter := r.redis.Scan(ctx, 0, "orders:page:*", 0).Iterator()
 	for iter.Next(ctx) {

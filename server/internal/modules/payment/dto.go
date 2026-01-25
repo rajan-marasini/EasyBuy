@@ -16,3 +16,16 @@ type EsewaResponse struct {
 	SuccessURL       string `json:"success_url"`
 	SignedFieldNames string `json:"signed_field_names"`
 }
+
+type VerifyKhaltiRequest struct {
+	PIDX string `json:"pidx"`
+}
+
+type KhaltiLookupResponse struct {
+	PIDX          string `json:"pidx"`
+	TotalAmount   int    `json:"total_amount"`
+	Status        string `json:"status"`
+	TransactionID string `json:"transaction_id"`
+	Fee           int    `json:"fee"`
+	Refunded      bool   `json:"refunded"`
+}
