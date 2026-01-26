@@ -144,7 +144,7 @@ func (h *handler) UpdateProduct(c *fiber.Ctx) error {
 	var req UpdateProductRequest
 
 	if err := c.BodyParser(&req); err != nil {
-		return fiber.NewError(http.StatusBadRequest, "Invalid request body")
+		return fiber.NewError(http.StatusBadRequest, err.Error())
 	}
 
 	// Handle file uploads

@@ -124,7 +124,7 @@ func (r *repository) Create(ctx context.Context, product *models.Product) (*mode
 
 	if productByte, err := json.Marshal(product); err == nil {
 		cacheKey := fmt.Sprintf("product:id:%s", product.ID)
-		r.redis.Set(ctx, cacheKey, &productByte, time.Hour)
+		r.redis.Set(ctx, cacheKey, productByte, time.Hour)
 	}
 
 	r.invalidateCache(ctx)
@@ -137,7 +137,7 @@ func (r *repository) Update(ctx context.Context, product *models.Product) (*mode
 		WithContext(ctx).
 		Model(&models.Product{}).
 		Where("id=?", product.ID).
-		Updates(&product).
+		Updates(product).
 		Error; err != nil {
 		return nil, err
 	}
@@ -149,7 +149,7 @@ func (r *repository) Update(ctx context.Context, product *models.Product) (*mode
 
 	if productByte, err := json.Marshal(product); err == nil {
 		cacheKey := fmt.Sprintf("product:id:%s", product.ID)
-		r.redis.Set(ctx, cacheKey, &productByte, time.Hour)
+		r.redis.Set(ctx, cacheKey, productByte, time.Hour)
 	}
 
 	r.invalidateCache(ctx)
@@ -173,12 +173,14 @@ func (r *repository) Delete(ctx context.Context, id string) (*models.Product, er
 	cacheKey := fmt.Sprintf("product:id:%s", id)
 	r.redis.Del(ctx, cacheKey)
 
+	r.invalidateCache(ctx)
+
 	return &product, nil
 }
 
 func (r *repository) invalidateCache(ctx context.Context) {
 	// Invalidate paginated product list cache
-	iter := r.redis.Scan(ctx, 0, "products:page:*", 0).Iterator()
+	iter := r.redis.Scan(ctx, 0, "products:search:*", 0).Iterator()
 	for iter.Next(ctx) {
 		r.redis.Del(ctx, iter.Val())
 	}
