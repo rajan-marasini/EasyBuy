@@ -35,6 +35,13 @@ func NewFiberApp(
 		ErrorHandler: errorHandler,
 	})
 
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{
+			"success": true,
+			"message": "EasyBuy API is running!",
+		})
+	})
+
 	registerMiddleware(app, cfg)
 
 	return &AppWrapper{
