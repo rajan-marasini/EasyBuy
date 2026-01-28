@@ -57,7 +57,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
         setNotifications([]);
       }
     })();
-  }, [user]);
+  }, [user?.id]);
 
   useEffect(() => {
     (() => {
@@ -188,7 +188,8 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
         }
       };
     })();
-  }, [user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   const addNotification = useCallback((notification: types.Notification) => {
     setNotifications((prev) => [notification, ...prev]);
