@@ -57,6 +57,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
         setNotifications([]);
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
   useEffect(() => {
