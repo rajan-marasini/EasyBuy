@@ -3,12 +3,32 @@ import api from "@/lib/api";
 import { PaginatedProductsResponse } from "@/lib/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-export function useAdminProducts(page: number = 1, limit: number = 10) {
+export function useAdminProducts(
+  page: number = 1,
+  limit: number = 10,
+  category?: string,
+  search?: string,
+) {
   return useQuery({
-    queryKey: ["admin-products", page, limit],
+    queryKey: ["admin-products", page, limit, category, search],
     queryFn: async (): Promise<PaginatedProductsResponse> => {
+      const params: any = { page, limit, search };
+
+      if (category && category.toLowerCase() !== "all") {
+        const { data } = await api.get<any>(`/categories/${category}`);
+        return {
+          data: data.products || [],
+          meta: {
+            current_page: 1,
+            total_pages: 1,
+            limit: (data.products || []).length,
+            total_items: (data.products || []).length,
+          },
+        } as PaginatedProductsResponse;
+      }
+
       const { data } = await api.get<PaginatedProductsResponse>("/products", {
-        params: { page, limit },
+        params,
       });
       return data;
     },
