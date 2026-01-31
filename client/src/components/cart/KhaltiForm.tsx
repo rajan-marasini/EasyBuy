@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -35,7 +36,7 @@ export function KhaltiForm({
           body: JSON.stringify({
             return_url: "http://localhost:3000/payment-success",
             website_url: "http://localhost:3000",
-            amount: parseFloat(amount) * 100,
+            amount: parseInt(amount) * 100,
             purchase_order_id,
             purchase_order_name,
           }),
