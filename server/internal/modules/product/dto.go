@@ -19,7 +19,7 @@ type CreateProductRequest struct {
 	Description string    `json:"description" form:"description" validate:"omitempty"`
 	Price       float64   `json:"price" form:"price" validate:"required,min=0"`
 	Stock       int       `json:"stock" form:"stock" validate:"required,min=0"`
-	Images      []string  `json:"images" form:"images" validate:"omitempty"`
+	Images      []string  `json:"images" form:"-" validate:"omitempty"`
 	IsActive    bool      `json:"is_active" form:"isActive" validate:"omitempty"`
 	Brand       string    `json:"brand" form:"brand"`
 	CategoryID  uuid.UUID `json:"category_id" form:"category_id" validate:"omitempty"`
@@ -30,7 +30,7 @@ type UpdateProductRequest struct {
 	Description string    `json:"description" form:"description" validate:"omitempty"`
 	Price       float64   `json:"price" form:"price" validate:"omitempty,min=0"`
 	Stock       int       `json:"stock" form:"stock" validate:"omitempty,min=0"`
-	Images      []string  `json:"images" form:"images" validate:"omitempty"`
+	Images      []string  `json:"images" form:"-" validate:"omitempty"`
 	IsActive    bool      `json:"is_active" form:"isActive" validate:"omitempty"`
 	Brand       string    `json:"brand" form:"brand"`
 	CategoryID  uuid.UUID `json:"category_id" form:"category_id" validate:"omitempty"`

@@ -91,17 +91,20 @@ func (h *handler) CreateProduct(c *fiber.Ctx) error {
 	var req CreateProductRequest
 
 	if err := c.BodyParser(&req); err != nil {
-		return fiber.NewError(http.StatusBadRequest, "Invalid request body")
+		return fiber.NewError(http.StatusBadRequest, "Body parsing failed: "+err.Error())
 	}
 
-	// Handle file uploads
+	// Handle file uploads and manual image collection
 	form, _ := c.MultipartForm()
-	if form != nil && form.File["images"] != nil {
-		images, err := utils.UploadToCloudinary(c.Context(), form.File["images"], h.cfg, "products")
-		if err != nil {
-			return fiber.NewError(http.StatusInternalServerError, err.Error())
+	if form != nil {
+		// Get files from 'images' key (as per user Postman screenshot)
+		if files := form.File["images"]; len(files) > 0 {
+			images, err := utils.UploadToCloudinary(c.Context(), files, h.cfg, "products")
+			if err != nil {
+				return fiber.NewError(http.StatusInternalServerError, "Upload failed: "+err.Error())
+			}
+			req.Images = append(req.Images, images...)
 		}
-		req.Images = images
 	}
 
 	if err := h.validator.Struct(req); err != nil {
@@ -144,17 +147,25 @@ func (h *handler) UpdateProduct(c *fiber.Ctx) error {
 	var req UpdateProductRequest
 
 	if err := c.BodyParser(&req); err != nil {
-		return fiber.NewError(http.StatusBadRequest, err.Error())
+		return fiber.NewError(http.StatusBadRequest, "Body parsing failed: "+err.Error())
 	}
 
-	// Handle file uploads
+	// Handle file uploads and manual image/URL collection
 	form, _ := c.MultipartForm()
-	if form != nil && form.File["images"] != nil {
-		images, err := utils.UploadToCloudinary(c.Context(), form.File["images"], h.cfg, "products")
-		if err != nil {
-			return fiber.NewError(http.StatusInternalServerError, err.Error())
+	if form != nil {
+		// 1. Collect existing URL strings from 'images' key
+		if urls := form.Value["images"]; len(urls) > 0 {
+			req.Images = append(req.Images, urls...)
 		}
-		req.Images = images
+
+		// 2. Collect new files from 'images_new' key
+		if files := form.File["images_new"]; len(files) > 0 {
+			images, err := utils.UploadToCloudinary(c.Context(), files, h.cfg, "products")
+			if err != nil {
+				return fiber.NewError(http.StatusInternalServerError, "Upload failed: "+err.Error())
+			}
+			req.Images = append(req.Images, images...)
+		}
 	}
 
 	if err := h.validator.Struct(req); err != nil {
