@@ -148,8 +148,11 @@ export default function ManageProductsPage() {
 
   const { data: products, meta } = productsData || {
     data: [],
-    meta: { current_page: 1, total_pages: 1 },
+    meta: { current_page: 1, total_pages: 1, limit: 10, total_items: 0 },
   };
+
+  const startIdx = (page - 1) * meta.limit + 1;
+  const endIdx = Math.min(page * meta.limit, meta.total_items);
 
   return (
     <div className="space-y-8 pb-10">
@@ -165,48 +168,61 @@ export default function ManageProductsPage() {
         <CreateProductDialog />
       </div>
 
-      <div className="flex flex-col md:flex-row items-center gap-4 bg-white/50 p-6 rounded-[2rem] border border-zinc-100 shadow-xl shadow-zinc-200/20 backdrop-blur-sm">
-        <div className="relative flex-1 w-full md:w-auto">
-          <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
-          <Input
-            placeholder="Search by name, brand..."
-            className="pl-11 pr-10 rounded-2xl bg-white border-zinc-200 h-12 w-full focus:ring-2 focus:ring-emerald-500/20 transition-all duration-300 shadow-sm"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery("")}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition-colors"
-              type="button"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
-        </div>
+      <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
+        <div className="flex flex-col md:flex-row items-center gap-4 bg-white/50 p-6 rounded-[2rem] border border-zinc-100 shadow-xl shadow-zinc-200/20 backdrop-blur-sm flex-1 w-full lg:w-auto">
+          <div className="relative flex-1 w-full md:w-auto">
+            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+            <Input
+              placeholder="Search by name, brand..."
+              className="pl-11 pr-10 rounded-2xl bg-white border-zinc-200 h-12 w-full focus:ring-2 focus:ring-emerald-500/20 transition-all duration-300 shadow-sm"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition-colors"
+                type="button"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
 
-        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-          <SelectTrigger className="w-full md:w-[240px] h-12 rounded-2xl border-zinc-200 bg-white shadow-sm focus:ring-2 focus:ring-emerald-500/20 transition-all font-semibold">
-            <SelectValue placeholder="Category" />
-          </SelectTrigger>
-          <SelectContent className="rounded-2xl border-zinc-100 shadow-2xl glassmorphism p-1">
-            <SelectItem
-              value="All"
-              className="rounded-xl p-3 font-semibold cursor-pointer focus:bg-emerald-50 focus:text-emerald-700"
-            >
-              All Categories
-            </SelectItem>
-            {categories?.map((cat) => (
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger className="w-full md:w-[240px] h-12 rounded-2xl border-zinc-200 bg-white shadow-sm focus:ring-2 focus:ring-emerald-500/20 transition-all font-semibold">
+              <SelectValue placeholder="Category" />
+            </SelectTrigger>
+            <SelectContent className="rounded-2xl border-zinc-100 shadow-2xl glassmorphism p-1">
               <SelectItem
-                key={cat.id}
-                value={cat.id!}
+                value="All"
                 className="rounded-xl p-3 font-semibold cursor-pointer focus:bg-emerald-50 focus:text-emerald-700"
               >
-                {cat.name}
+                All Categories
               </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+              {categories?.map((cat) => (
+                <SelectItem
+                  key={cat.id}
+                  value={cat.id!}
+                  className="rounded-xl p-3 font-semibold cursor-pointer focus:bg-emerald-50 focus:text-emerald-700"
+                >
+                  {cat.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {meta.total_items > 0 && (
+          <div className="px-6 py-3 bg-emerald-50/50 border border-emerald-100 rounded-2xl text-emerald-700 font-bold text-sm shadow-sm">
+            Showing{" "}
+            <span className="text-emerald-900">
+              {startIdx}-{endIdx}
+            </span>{" "}
+            of <span className="text-emerald-900">{meta.total_items}</span>{" "}
+            products
+          </div>
+        )}
       </div>
 
       <div className="bg-white/80 backdrop-blur-xl rounded-[2.5rem] shadow-2xl shadow-zinc-200/50 border border-zinc-100/50 overflow-hidden">

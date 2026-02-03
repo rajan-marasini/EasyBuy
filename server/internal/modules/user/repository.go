@@ -57,6 +57,7 @@ func (r *repository) GetAll(ctx context.Context, page, limit int) ([]models.User
 	if err := r.db.WithContext(ctx).
 		Limit(limit).
 		Offset(offset).
+		Order("created_at DESC").
 		Find(&users).Error; err != nil {
 		return nil, 0, err
 	}

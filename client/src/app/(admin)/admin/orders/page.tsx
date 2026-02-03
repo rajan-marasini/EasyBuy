@@ -108,6 +108,9 @@ export default function ManageOrdersPage() {
     pagination: { page: 1, total_pages: 1, limit: 10, total: 0 },
   };
 
+  const startIdx = (page - 1) * pagination.limit + 1;
+  const endIdx = Math.min(page * pagination.limit, pagination.total);
+
   return (
     <div className="space-y-8 pb-10">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
@@ -119,6 +122,15 @@ export default function ManageOrdersPage() {
             Track and fulfill customer orders with ease.
           </p>
         </div>
+        {pagination.total > 0 && (
+          <div className="px-6 py-3 bg-blue-50/50 border border-blue-100 rounded-2xl text-blue-700 font-bold text-sm shadow-sm">
+            Showing{" "}
+            <span className="text-blue-900">
+              {startIdx}-{endIdx}
+            </span>{" "}
+            of <span className="text-blue-900">{pagination.total}</span> orders
+          </div>
+        )}
       </div>
 
       <div className="bg-white/80 backdrop-blur-xl rounded-[2.5rem] shadow-2xl shadow-zinc-200/50 border border-zinc-100/50 overflow-hidden">

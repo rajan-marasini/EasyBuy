@@ -251,6 +251,9 @@ export default function ManageUsersPage() {
                 Permissions
               </TableHead>
               <TableHead className="py-6 font-bold text-zinc-900 uppercase text-xs tracking-widest">
+                Verified
+              </TableHead>
+              <TableHead className="py-6 font-bold text-zinc-900 uppercase text-xs tracking-widest">
                 Status
               </TableHead>
               <TableHead className="py-6 font-bold text-zinc-900 uppercase text-xs tracking-widest">
@@ -316,6 +319,25 @@ export default function ManageUsersPage() {
                       className={`${getRoleBadge(user.role)} border-none px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider`}
                     >
                       {user.role}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="py-4">
+                    <Badge
+                      variant="secondary"
+                      className={`${
+                        user.is_verified
+                          ? "bg-emerald-100 text-emerald-700 font-bold"
+                          : "bg-zinc-100 text-zinc-500 font-bold"
+                      } border-none px-4 py-1.5 rounded-full text-[10px] shadow-sm flex items-center gap-1.5 w-fit`}
+                    >
+                      {user.is_verified ? (
+                        <>
+                          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                          Verified
+                        </>
+                      ) : (
+                        "Not Verified"
+                      )}
                     </Badge>
                   </TableCell>
                   <TableCell className="py-4">
