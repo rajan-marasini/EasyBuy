@@ -95,6 +95,25 @@ export interface PaginatedOrdersResponse {
   };
 }
 
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: string;
+  status: string;
+  is_verified: boolean;
+  email_verified_at?: string;
+  created_at: string;
+  updated_at: string;
+  last_login_at?: string;
+}
+
+export interface PaginatedUsersResponse {
+  meta: PaginationMeta;
+  data: User[];
+}
+
 export interface Notification {
   id: string;
   user_id: string;
