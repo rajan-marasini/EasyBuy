@@ -8,8 +8,9 @@ import (
 )
 
 type PaginationRequest struct {
-	Page  int `query:"page" json:"page" validate:"min=1"`
-	Limit int `query:"limit" json:"limit" validate:"min=1,max=100"`
+	Page   int    `query:"page" json:"page" validate:"min=1"`
+	Limit  int    `query:"limit" json:"limit" validate:"min=1,max=100"`
+	Search string `query:"search" json:"search"`
 }
 
 type CreateUserRequest struct {

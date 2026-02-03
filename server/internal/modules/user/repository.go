@@ -13,7 +13,7 @@ import (
 )
 
 type Repository interface {
-	GetAll(ctx context.Context, page, limit int) ([]models.User, int64, error)
+	GetAll(ctx context.Context, page, limit int, search string) ([]models.User, int64, error)
 	GetByID(ctx context.Context, id string) (*models.User, error)
 	GetByEmail(ctx context.Context, email string) (*models.User, error)
 	Create(ctx context.Context, user *models.User) (*models.User, error)
@@ -35,12 +35,12 @@ type userCache struct {
 	Total int64         `json:"total"`
 }
 
-func (r *repository) GetAll(ctx context.Context, page, limit int) ([]models.User, int64, error) {
+func (r *repository) GetAll(ctx context.Context, page, limit int, search string) ([]models.User, int64, error) {
 	var users []models.User
 	var total int64
 
 	offset := (page - 1) * limit
-	cacheKey := fmt.Sprintf("users:page:%d:limit:%d", page, limit)
+	cacheKey := fmt.Sprintf("users:search:%s:page:%d:limit:%d", search, page, limit)
 
 	if val, err := r.redis.Get(ctx, cacheKey).Result(); err == nil {
 		var cache userCache
@@ -50,11 +50,17 @@ func (r *repository) GetAll(ctx context.Context, page, limit int) ([]models.User
 		}
 	}
 
-	if err := r.db.Model(&models.User{}).Count(&total).Error; err != nil {
+	query := r.db.Model(&models.User{})
+	if search != "" {
+		searchTerm := "%" + search + "%"
+		query = query.Where("name ILIKE ? OR email ILIKE ? OR phone ILIKE ?", searchTerm, searchTerm, searchTerm)
+	}
+
+	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	if err := r.db.WithContext(ctx).
+	if err := query.WithContext(ctx).
 		Limit(limit).
 		Offset(offset).
 		Order("created_at DESC").
@@ -132,7 +138,7 @@ func (r *repository) Delete(ctx context.Context, id string) error {
 }
 
 func (r *repository) invalidateCache(ctx context.Context) {
-	iter := r.redis.Scan(ctx, 0, "users:page:*", 0).Iterator()
+	iter := r.redis.Scan(ctx, 0, "users:search:*", 0).Iterator()
 	for iter.Next(ctx) {
 		r.redis.Del(ctx, iter.Val())
 	}

@@ -33,7 +33,7 @@ func (s *service) GetAll(ctx context.Context, req PaginationRequest) (PaginatedU
 		req.Limit = 10
 	}
 
-	users, total, err := s.repo.GetAll(ctx, req.Page, req.Limit)
+	users, total, err := s.repo.GetAll(ctx, req.Page, req.Limit, req.Search)
 	if err != nil {
 		return PaginatedUsersResponse{}, err
 	}
