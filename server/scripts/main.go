@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"os"
 	"time"
 
 	"github.com/google/uuid"
@@ -16,28 +17,39 @@ import (
 )
 
 func main() {
-	// 1. Load Config
 	cfg := config.Load()
-
-	// 2. Connect to Database
 	db := database.Connect(cfg)
 
-	// 3. Migrate Database
-	database.Migrate(db)
+	if len(os.Args) < 2 {
+		log.Fatalf(`
+Provide command to handle operation
+seed : seed the initial value in the database
+migrate : Run migration
+		`)
+		return
+	}
 
-	// 4. Seed User
+	command := os.Args[1]
+
+	switch command {
+	case "migrate":
+		database.Migrate(db)
+	case "seed":
+		seed(db)
+	default:
+		log.Fatal("Invalid command")
+	}
+}
+
+func seed(db *gorm.DB) {
 	adminUser := seedUser(db)
 
-	// 5. Seed Categories
 	categories := seedCategories(db)
 
-	// 6. Seed Products
 	products := seedProducts(db, adminUser.ID, categories)
 
-	// 7. Seed Reviews
 	seedReviews(db, adminUser, products)
 
-	// 8. Update Product Rating Statistics
 	updateProductRatingStats(db)
 
 	log.Println("Seeding completed successfully")

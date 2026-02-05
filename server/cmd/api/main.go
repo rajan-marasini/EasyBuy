@@ -30,7 +30,6 @@ func main() {
 	signal.Notify(quitChan, os.Interrupt, syscall.SIGTERM)
 
 	db := database.Connect(cfg)
-	database.Migrate(db)
 
 	sqlDB, _ := db.DB()
 	defer sqlDB.Close()
