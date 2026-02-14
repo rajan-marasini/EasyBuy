@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import api from "@/lib/api";
-import { PaginatedProductsResponse } from "@/lib/types";
+import { PaginatedProductsResponse, Product } from "@/lib/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export function useAdminProducts(
@@ -12,10 +11,16 @@ export function useAdminProducts(
   return useQuery({
     queryKey: ["admin-products", page, limit, category, search],
     queryFn: async (): Promise<PaginatedProductsResponse> => {
-      const params: any = { page, limit, search };
+      const params: {
+        page: number;
+        limit: number;
+        search: string | undefined;
+      } = { page, limit, search };
 
       if (category && category.toLowerCase() !== "all") {
-        const { data } = await api.get<any>(`/categories/${category}`);
+        const { data } = await api.get<{ products: Product[] }>(
+          `/categories/${category}`,
+        );
         return {
           data: data.products || [],
           meta: {
@@ -39,7 +44,7 @@ export function useCreateProduct() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: any) => {
+    mutationFn: async (data: Product) => {
       const response = await api.post("/products", data, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -58,7 +63,7 @@ export function useUpdateProduct() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+    mutationFn: async ({ id, data }: { id: string; data: Product }) => {
       const response = await api.patch(`/products/${id}`, data, {
         headers: {
           "Content-Type": "multipart/form-data",

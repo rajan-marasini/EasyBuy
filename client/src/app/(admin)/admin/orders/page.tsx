@@ -24,7 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useAdminOrders, useUpdateOrderStatus } from "@/hooks/useAdminOrders";
+import { useAdminOrders } from "@/hooks/useAdminOrders";
 import { OrderListItem } from "@/lib/types";
 import {
   Eye,
@@ -39,7 +39,6 @@ import { useState } from "react";
 export default function ManageOrdersPage() {
   const [page, setPage] = useState(1);
   const { data: ordersData, isLoading, isError } = useAdminOrders(page);
-  const updateStatus = useUpdateOrderStatus();
   const [selectedOrder, setSelectedOrder] = useState<OrderListItem | null>(
     null,
   );

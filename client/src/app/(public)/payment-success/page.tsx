@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { useCreateOrder } from "@/hooks/useOrder";
 import { useCartStore } from "@/lib/cart-store";
+import { AxiosError } from "axios";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -58,7 +59,7 @@ export default function PaymentSuccessPage() {
           localStorage.removeItem("pending_order");
           toast.success("Order placed successfully!");
         },
-        onError: (error: any) => {
+        onError: (error: AxiosError<{ message: string }>) => {
           setStatus("error");
           toast.error(
             error?.response?.data?.message || "Failed to finalize order",

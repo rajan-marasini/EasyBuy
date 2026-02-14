@@ -79,6 +79,36 @@ export interface OrderListItem {
   created_at: string;
 }
 
+export interface Order {
+  id: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  total_amount: number;
+  payment_status: string;
+  payment_method: string;
+  order_status: string;
+  delivery_status: string;
+  shipping_address: string;
+  items: {
+    id: string;
+    product_id: string;
+    product_name: string;
+    product_image?: string;
+    quantity: number;
+    price: number;
+  }[];
+  created_at: string;
+}
+
+export interface CreateOrderResponse {
+  success: boolean;
+  message: string;
+  data: Order;
+}
+
 export interface OrderPaginationMeta {
   page: number;
   limit: number;

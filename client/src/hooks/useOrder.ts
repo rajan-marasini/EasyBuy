@@ -1,4 +1,5 @@
 import api from "@/lib/api";
+import { CreateOrderResponse } from "@/lib/types";
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
@@ -16,14 +17,20 @@ interface CreateOrderRequest {
 }
 
 export function useCreateOrder() {
-  return useMutation({
+  return useMutation<
+    CreateOrderResponse,
+    AxiosError<{ message: string }>,
+    CreateOrderRequest
+  >({
     mutationFn: async (orderData: CreateOrderRequest) => {
-      const { data } = await api.post("/orders", orderData);
+      const { data } = await api.post<CreateOrderResponse>(
+        "/orders",
+        orderData,
+      );
       return data;
     },
     onError: (error) => {
-      const err = error as AxiosError<{ message: string }>;
-      toast.error(err.response?.data?.message || "Failed to place order");
+      toast.error(error.response?.data?.message || "Failed to place order");
     },
   });
 }

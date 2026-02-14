@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 
 import { EsewaForm } from "@/components/cart/EsewaForm";
 import { KhaltiForm } from "@/components/cart/KhaltiForm";
+import { AxiosError } from "axios";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -104,7 +105,7 @@ export default function CartPage() {
           clearCart();
           setIsCheckoutDialogOpen(false);
         },
-        onError: (error: any) => {
+        onError: (error: AxiosError<{ message: string }>) => {
           toast.error(
             error?.response?.data?.message || "Failed to place order",
           );

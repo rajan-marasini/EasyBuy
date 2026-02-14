@@ -85,6 +85,7 @@ export default function UpdateDeliveryStatusDialog({
           toast.success("Delivery status updated successfully!");
           onOpenChange(false);
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         onError: (error: any) => {
           const message =
             error.response?.data?.message || "Failed to update delivery status";
