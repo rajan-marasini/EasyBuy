@@ -6,14 +6,16 @@ import (
 )
 
 type ProductSlimDTO struct {
-	ID          *uuid.UUID `json:"id,omitempty"`
-	Name        string     `json:"name"`
-	Description string     `json:"description"`
-	Price       float64    `json:"price"`
-	Stock       int        `json:"stock"`
-	Images      []string   `json:"images"`
-	IsActive    bool       `json:"is_active"`
-	Brand       string     `json:"brand"`
+	ID            *uuid.UUID `json:"id,omitempty"`
+	Name          string     `json:"name"`
+	Description   string     `json:"description"`
+	Price         float64    `json:"price"`
+	Stock         int        `json:"stock"`
+	Images        []string   `json:"images"`
+	IsActive      bool       `json:"is_active"`
+	Brand         string     `json:"brand"`
+	AverageRating float64    `json:"average_rating"`
+	TotalReviews  int        `json:"total_reviews"`
 }
 
 type CreateCategoryRequest struct {
@@ -38,14 +40,16 @@ func ToCategoryDTO(c *models.Category) CategoryDTO {
 			pID = &p.ID
 		}
 		productDTOs = append(productDTOs, ProductSlimDTO{
-			ID:          pID,
-			Name:        p.Name,
-			Description: p.Description,
-			Price:       p.Price,
-			Stock:       p.Stock,
-			Images:      p.Images,
-			IsActive:    p.IsActive,
-			Brand:       p.Brand,
+			ID:            pID,
+			Name:          p.Name,
+			Description:   p.Description,
+			Price:         p.Price,
+			Stock:         p.Stock,
+			Images:        p.Images,
+			IsActive:      p.IsActive,
+			Brand:         p.Brand,
+			AverageRating: p.AverageRating,
+			TotalReviews:  p.TotalReviews,
 		})
 	}
 
