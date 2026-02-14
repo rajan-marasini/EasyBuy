@@ -27,8 +27,8 @@ type Product struct {
 	UserID uuid.UUID `gorm:"type:uuid;not null;index" json:"user_id"`
 	User   User      `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"-"`
 
-	CategoryID uuid.UUID `gorm:"type:uuid;index" json:"category_id"`
-	Category   Category  `gorm:"foreignKey:CategoryID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"category"`
+	CategoryID *uuid.UUID `gorm:"type:uuid;index" json:"category_id"`
+	Category   Category   `gorm:"foreignKey:CategoryID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"category"`
 
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`

@@ -69,8 +69,11 @@ func (s *service) CreateProduct(ctx context.Context, req CreateProductRequest, u
 		Images:      req.Images,
 		IsActive:    req.IsActive,
 		UserID:      uid,
-		CategoryID:  req.CategoryID,
 		Brand:       req.Brand,
+	}
+
+	if req.CategoryID != uuid.Nil {
+		product.CategoryID = &req.CategoryID
 	}
 
 	createdProduct, err := s.repo.Create(ctx, product)
@@ -98,11 +101,14 @@ func (s *service) UpdateProduct(ctx context.Context, id string, req UpdateProduc
 	if req.Description != "" {
 		product.Description = req.Description
 	}
-	if req.Price != 0 {
-		product.Price = req.Price
+	if req.Price != nil {
+		product.Price = *req.Price
 	}
-	if req.Stock != 0 {
-		product.Stock = req.Stock
+	if req.Stock != nil {
+		product.Stock = *req.Stock
+	}
+	if req.IsActive != nil {
+		product.IsActive = *req.IsActive
 	}
 	if len(req.Images) > 0 {
 		product.Images = req.Images
@@ -111,7 +117,7 @@ func (s *service) UpdateProduct(ctx context.Context, id string, req UpdateProduc
 		product.Brand = req.Brand
 	}
 	if req.CategoryID != uuid.Nil {
-		product.CategoryID = req.CategoryID
+		product.CategoryID = &req.CategoryID
 	}
 
 	updatedProduct, err := s.repo.Update(ctx, product)

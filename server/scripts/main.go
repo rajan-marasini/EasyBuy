@@ -153,7 +153,7 @@ func seedProducts(db *gorm.DB, userID uuid.UUID, categories []models.Category) [
 			},
 			IsActive:   true,
 			UserID:     userID,
-			CategoryID: category.ID,
+			CategoryID: &category.ID,
 			Brand:      fmt.Sprintf("Brand %c", rune('A'+rand.Intn(26))),
 		}
 

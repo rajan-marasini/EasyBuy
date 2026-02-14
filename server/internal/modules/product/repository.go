@@ -135,9 +135,9 @@ func (r *repository) Create(ctx context.Context, product *models.Product) (*mode
 func (r *repository) Update(ctx context.Context, product *models.Product) (*models.Product, error) {
 	if err := r.db.
 		WithContext(ctx).
-		Model(&models.Product{}).
-		Where("id=?", product.ID).
-		Updates(product).
+		Model(product).
+		Omit("Category", "User"). // Don't try to update associations
+		Save(product).
 		Error; err != nil {
 		return nil, err
 	}

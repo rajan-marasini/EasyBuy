@@ -28,10 +28,10 @@ type CreateProductRequest struct {
 type UpdateProductRequest struct {
 	Name        string    `json:"name" form:"name" validate:"omitempty,min=3,max=255"`
 	Description string    `json:"description" form:"description" validate:"omitempty"`
-	Price       float64   `json:"price" form:"price" validate:"omitempty,min=0"`
-	Stock       int       `json:"stock" form:"stock" validate:"omitempty,min=0"`
+	Price       *float64  `json:"price" form:"price" validate:"omitempty,min=0"`
+	Stock       *int      `json:"stock" form:"stock" validate:"omitempty,min=0"`
 	Images      []string  `json:"images" form:"-" validate:"omitempty"`
-	IsActive    bool      `json:"is_active" form:"isActive" validate:"omitempty"`
+	IsActive    *bool     `json:"is_active" form:"isActive" validate:"omitempty"`
 	Brand       string    `json:"brand" form:"brand"`
 	CategoryID  uuid.UUID `json:"category_id" form:"category_id" validate:"omitempty"`
 }
@@ -78,10 +78,15 @@ func ToProductDTO(p *models.Product) ProductDTO {
 		AverageRating: p.AverageRating,
 		TotalReviews:  p.TotalReviews,
 		UserID:        p.UserID,
-		CategoryID:    p.CategoryID,
-		Category:      category.ToCategoryDTO(&p.Category),
-		CreatedAt:     p.CreatedAt,
-		UpdatedAt:     p.UpdatedAt,
-		Brand:         p.Brand,
+		CategoryID: func() uuid.UUID {
+			if p.CategoryID != nil {
+				return *p.CategoryID
+			}
+			return uuid.Nil
+		}(),
+		Category:  category.ToCategoryDTO(&p.Category),
+		CreatedAt: p.CreatedAt,
+		UpdatedAt: p.UpdatedAt,
+		Brand:     p.Brand,
 	}
 }
