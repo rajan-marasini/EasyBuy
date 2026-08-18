@@ -1,0 +1,15 @@
+# Caddy reverse proxy configuration for EasyBuy
+# If you have a custom domain (e.g. easybuy.example.com), replace :80 with your domain name below.
+# Caddy will automatically issue and renew free Let's Encrypt SSL certificates for custom domains!
+
+:80 {
+    # Reverse proxy API requests to backend
+    handle /api/* {
+        reverse_proxy server:8000
+    }
+
+    # Reverse proxy everything else to frontend
+    handle /* {
+        reverse_proxy client:3000
+    }
+}

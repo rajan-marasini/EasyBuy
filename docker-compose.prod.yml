@@ -1,0 +1,81 @@
+services:
+    db:
+        image: postgres:alpine
+        container_name: easybuy-db
+        restart: always
+        environment:
+            POSTGRES_USER: ${POSTGRES_USER:-postgres}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres_prod_pass}
+            POSTGRES_DB: ${POSTGRES_DB:-easybuy}
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+        networks:
+            - easybuy-net
+
+    redis:
+        image: redis:alpine
+        container_name: easybuy-redis
+        restart: always
+        networks:
+            - easybuy-net
+
+    rabbitmq:
+        image: rabbitmq:4-management-alpine
+        container_name: easybuy-rabbitmq
+        restart: always
+        environment:
+            RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+            RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-guest}
+        networks:
+            - easybuy-net
+
+    server:
+        image: ${SERVER_IMAGE:-ghcr.io/rajan-marasini/easybuy-server:latest}
+        container_name: easybuy-server
+        restart: always
+        depends_on:
+            - db
+            - redis
+            - rabbitmq
+        env_file:
+            - ./server.env
+        environment:
+            DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres_prod_pass@db:5432/easybuy?sslmode=disable}
+            REDIS_ADDRESS: redis:6379
+            RABBITMQ_URL: amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@rabbitmq:5672/
+        networks:
+            - easybuy-net
+
+    client:
+        image: ${CLIENT_IMAGE:-ghcr.io/rajan-marasini/easybuy-client:latest}
+        container_name: easybuy-client
+        restart: always
+        depends_on:
+            - server
+        env_file:
+            - ./client.env
+        networks:
+            - easybuy-net
+
+    caddy:
+        image: caddy:alpine
+        container_name: easybuy-caddy
+        restart: always
+        ports:
+            - "80:80"
+            - "443:443"
+        volumes:
+            - ./Caddyfile:/etc/caddy/Caddyfile
+            - caddy_data:/data
+            - caddy_config:/config
+        networks:
+            - easybuy-net
+
+volumes:
+    postgres_data:
+    caddy_data:
+    caddy_config:
+
+networks:
+    easybuy-net:
+        driver: bridge
