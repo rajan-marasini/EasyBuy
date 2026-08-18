@@ -18,6 +18,7 @@ EasyBuy is a modern, full-stack e-commerce platform built with efficiency and sc
 
 ### Backend
 
+
 -   **Language**: [Go](https://go.dev/)
 -   **Web Framework**: [Fiber](https://gofiber.io/)
 -   **ORM**: [GORM](https://gorm.io/)
