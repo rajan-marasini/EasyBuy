@@ -44,7 +44,7 @@ export function useCreateProduct() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: Product) => {
+    mutationFn: async (data: FormData) => {
       const response = await api.post("/products", data, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -63,7 +63,7 @@ export function useUpdateProduct() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: Product }) => {
+    mutationFn: async ({ id, data }: { id: string; data: FormData }) => {
       const response = await api.patch(`/products/${id}`, data, {
         headers: {
           "Content-Type": "multipart/form-data",

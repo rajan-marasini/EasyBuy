@@ -17,6 +17,10 @@ import (
 )
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+		log.Println("[Error]: ", err.Error())
+	}
+
 	cfg := config.Load()
 	db := database.Connect(cfg)
 
