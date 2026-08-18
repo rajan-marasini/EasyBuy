@@ -12,12 +12,7 @@ type Config struct {
 	CLIENT_URL string `env:"CLIENT_URL" envDefault:"http://localhost:3000"`
 	API_URL    string `env:"API_URL" envDefault:"http://localhost:8000"`
 
-	DATABASE_HOST     string `env:"DATABASE_HOST" envDefault:"localhost"`
-	DATABASE_PORT     string `env:"DATABASE_PORT" envDefault:"5432"`
-	DATABASE_NAME     string `env:"DATABASE_NAME" envDefault:"easybuy"`
-	DATABASE_USER     string `env:"DATABASE_USER" envDefault:"postgres"`
-	DATABASE_PASSWORD string `env:"DATABASE_PASSWORD" envDefault:"postgres"`
-	DATABASE_SSLMODE  string `env:"DATABASE_SSLMODE" envDefault:"disable"`
+	DATABASE_URL string `env:"DATABASE_URL"`
 
 	JWT_SECRET string `env:"JWT_SECRET"`
 

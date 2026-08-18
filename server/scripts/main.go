@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/joho/godotenv"
 	"github.com/lib/pq"
 	"github.com/rajan-marasini/EasyBuy/server/internal/config"
 	"github.com/rajan-marasini/EasyBuy/server/internal/database"
@@ -26,9 +27,9 @@ func main() {
 
 	if len(os.Args) < 2 {
 		log.Fatalf(`
-Provide command to handle operation
-seed : seed the initial value in the database
-migrate : Run migration
+			Provide command to handle operation
+			seed : seed the initial value in the database
+			migrate : Run migration
 		`)
 		return
 	}
