@@ -11,15 +11,22 @@ import (
 )
 
 func ConnectRedis(cfg *config.Config) *redis.Client {
-	db, _ := strconv.Atoi(cfg.REDIS_DB)
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     cfg.REDIS_ADDRESS,
-		Password: cfg.REDIS_PASSWORD,
-		DB:       db,
-	})
+	var opts *redis.Options
+	if opt, err := redis.ParseURL(cfg.REDIS_ADDRESS); err == nil {
+		opts = opt
+	} else {
+		db, _ := strconv.Atoi(cfg.REDIS_DB)
+		opts = &redis.Options{
+			Addr:     cfg.REDIS_ADDRESS,
+			Password: cfg.REDIS_PASSWORD,
+			DB:       db,
+		}
+	}
+
+	rdb := redis.NewClient(opts)
 
 	if err := rdb.Ping(context.Background()).Err(); err != nil {
-		log.Println("Redis Connection Failed")
+		log.Println("Redis Connection Failed:", err)
 		os.Exit(1)
 	} else {
 		log.Println("Redis connected successfully")
