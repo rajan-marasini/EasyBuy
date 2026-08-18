@@ -61,7 +61,7 @@ func SendEmail(cfg *config.Config, to, subject, body string) error {
 
 func sendBrevoHTTP(cfg *config.Config, to, subject, body string) error {
 	url := "https://api.brevo.com/v3/smtp/email"
-	senderEmail := cfg.SMTP_USER
+	senderEmail := strings.TrimSpace(cfg.SMTP_USER)
 	if senderEmail == "" {
 		senderEmail = "no-reply@easybuy.com"
 	}
@@ -72,7 +72,7 @@ func sendBrevoHTTP(cfg *config.Config, to, subject, body string) error {
 			"name":  "EasyBuy",
 		},
 		"to": []map[string]string{
-			{"email": to},
+			{"email": strings.TrimSpace(to)},
 		},
 		"subject":     subject,
 		"htmlContent": body,
@@ -88,7 +88,9 @@ func sendBrevoHTTP(cfg *config.Config, to, subject, body string) error {
 		return err
 	}
 
-	req.Header.Set("api-key", cfg.SMTP_PASSWORD)
+	apiKey := strings.TrimSpace(cfg.SMTP_PASSWORD)
+
+	req.Header.Set("api-key", apiKey)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 
@@ -109,14 +111,14 @@ func sendBrevoHTTP(cfg *config.Config, to, subject, body string) error {
 
 func sendResendHTTP(cfg *config.Config, to, subject, body string) error {
 	url := "https://api.resend.com/emails"
-	fromEmail := cfg.SMTP_USER
+	fromEmail := strings.TrimSpace(cfg.SMTP_USER)
 	if fromEmail == "" || !strings.Contains(fromEmail, "@") {
 		fromEmail = "EasyBuy <onboarding@resend.dev>"
 	}
 
 	payload := map[string]any{
 		"from":    fromEmail,
-		"to":      []string{to},
+		"to":      []string{strings.TrimSpace(to)},
 		"subject": subject,
 		"html":    body,
 	}
@@ -131,7 +133,9 @@ func sendResendHTTP(cfg *config.Config, to, subject, body string) error {
 		return err
 	}
 
-	req.Header.Set("Authorization", "Bearer "+cfg.SMTP_PASSWORD)
+	apiKey := strings.TrimSpace(cfg.SMTP_PASSWORD)
+
+	req.Header.Set("Authorization", "Bearer "+apiKey)
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
