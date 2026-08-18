@@ -16,13 +16,17 @@ func IsAuthenticated(cfg *config.Config) fiber.Handler {
 		authHeader := c.Get("Authorization")
 		if authHeader != "" {
 			parts := strings.Split(authHeader, " ")
-			if len(parts) == 2 && parts[0] == "Bearer" {
+			if len(parts) == 2 && strings.EqualFold(parts[0], "Bearer") {
 				tokenString = parts[1]
 			}
 		}
 
 		if tokenString == "" {
 			tokenString = c.Cookies("token")
+		}
+
+		if tokenString == "" {
+			tokenString = c.Query("token")
 		}
 
 		if tokenString == "" {

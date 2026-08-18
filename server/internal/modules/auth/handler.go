@@ -76,8 +76,8 @@ func (h *handler) LoginUser(c *fiber.Ctx) error {
 		Name:     "token",
 		Value:    res.Token,
 		HTTPOnly: true,
-		Secure:   false,
-		SameSite: "lax",
+		Secure:   true,
+		SameSite: "none",
 	})
 
 	return c.Status(200).JSON(fiber.Map{
@@ -92,8 +92,8 @@ func (h *handler) LogoutUser(c *fiber.Ctx) error {
 		Name:     "token",
 		Value:    "",
 		HTTPOnly: true,
-		Secure:   false,
-		SameSite: "lax",
+		Secure:   true,
+		SameSite: "none",
 	})
 
 	return c.Status(200).JSON(fiber.Map{
