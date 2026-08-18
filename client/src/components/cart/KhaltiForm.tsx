@@ -25,23 +25,17 @@ export function KhaltiForm({
     setIsLoading(true);
 
     try {
-      const res = await fetch(
-        "https://dev.khalti.com/api/v2/epayment/initiate/",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Key ${process.env.NEXT_PUBLIC_KHALTI_LIVE_SECRET_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            return_url: "http://localhost:3000/payment-success",
-            website_url: "http://localhost:3000",
-            amount: parseInt(amount) * 100,
-            purchase_order_id,
-            purchase_order_name,
-          }),
+      const res = await fetch("/api/khalti/initiate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({
+          amount,
+          purchase_order_id,
+          purchase_order_name,
+        }),
+      });
       const response = await res.json();
       if (response?.payment_url) {
         window.location.href = response.payment_url;
