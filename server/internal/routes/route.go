@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/gofiber/contrib/socketio"
+	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/rajan-marasini/EasyBuy/server/internal/app"
 	"github.com/rajan-marasini/EasyBuy/server/internal/middleware"
@@ -19,6 +20,13 @@ import (
 func RegisterRoutes(app *app.AppWrapper) {
 	api := app.Group("/api")
 	v1 := api.Group("/v1")
+
+	v1.Get("/health", func(c *fiber.Ctx) error {
+		return c.Status(200).JSON(fiber.Map{
+			"status":  "ok",
+			"message": "EasyBuy API is running",
+		})
+	})
 
 	authGroup := v1.Group("/auth")
 	auth.RegisterAuthRoute(authGroup, app)
