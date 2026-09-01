@@ -1,10 +1,12 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 
 	"github.com/joho/godotenv"
@@ -23,25 +25,20 @@ func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Println("[Error]:", err.Error())
 	}
-
 	cfg := config.Load()
 
-	quitChan := make(chan os.Signal, 1)
-	signal.Notify(quitChan, os.Interrupt, syscall.SIGTERM)
-
 	db := database.Connect(cfg)
-
-	sqlDB, _ := db.DB()
-	defer sqlDB.Close()
-
+	sqlDB, err := db.DB()
+	if err != nil {
+		log.Fatal("[PostgreSQL Error]:", err)
+	}
 	rdb := database.ConnectRedis(cfg)
-	defer rdb.Close()
-
 	rabbit, err := queue.NewRabbitMQ(cfg)
 	if err != nil {
-		log.Fatal("[RabbitMQ Error]:", err.Error())
+		_ = rdb.Close()
+		_ = sqlDB.Close()
+		log.Fatal("[RabbitMQ Error]:", err)
 	}
-	defer rabbit.Close()
 
 	notificationRepo := notification.NewRepository(db, rdb)
 	notificationService := notification.NewNotificationService(notificationRepo, rabbit)
@@ -49,28 +46,52 @@ func main() {
 	emailWorker := worker.NewEmailWorker(rabbit, cfg)
 	notificationWorker := worker.NewNotificationWorker(rabbit, cfg, wsManager)
 
-	go emailWorker.Start()
-	go notificationWorker.Start()
-
-	app := app.NewFiberApp(cfg, db, rdb, rabbit, notificationService, wsManager)
-
-	routes.RegisterRoutes(app)
-
+	workerCtx, cancelWorkers := context.WithCancel(context.Background())
+	var workerWG sync.WaitGroup
+	workerWG.Add(2)
 	go func() {
-		log.Println("Server running on port", cfg.PORT)
-		if err := app.Listen(fmt.Sprintf(":%s", cfg.PORT)); err != nil {
-			log.Fatal("[Error]:", err.Error())
-		}
+		defer workerWG.Done()
+		emailWorker.Start(workerCtx)
+	}()
+	go func() {
+		defer workerWG.Done()
+		notificationWorker.Start(workerCtx)
 	}()
 
-	handleGracefulShutdown(app, quitChan)
-}
+	application := app.NewFiberApp(cfg, db, rdb, rabbit, notificationService, wsManager)
+	routes.RegisterRoutes(application)
 
-func handleGracefulShutdown(app *app.AppWrapper, quitChan chan os.Signal) {
-	<-quitChan
-	log.Println("Shutdown signal received")
-	if err := app.Shutdown(); err != nil {
-		log.Fatal("Error shutting down server:", err)
+	serverErr := make(chan error, 1)
+	go func() {
+		log.Println("Server running on port", cfg.PORT)
+		serverErr <- application.Listen(fmt.Sprintf(":%s", cfg.PORT))
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+	select {
+	case sig := <-quit:
+		log.Printf("Shutdown signal received: %s", sig)
+	case err := <-serverErr:
+		if err != nil {
+			log.Printf("HTTP server stopped: %v", err)
+		}
+	}
+	signal.Stop(quit)
+
+	// Stop accepting requests before cancelling consumers. Cancelling the
+	// worker contexts makes ConsumeWithContext unregister consumers cleanly.
+	if err := application.Shutdown(); err != nil {
+		log.Printf("Error shutting down HTTP server: %v", err)
+	}
+	cancelWorkers()
+	workerWG.Wait()
+	rabbit.Close()
+	if err := rdb.Close(); err != nil {
+		log.Printf("Error closing Redis: %v", err)
+	}
+	if err := sqlDB.Close(); err != nil {
+		log.Printf("Error closing PostgreSQL: %v", err)
 	}
 	log.Println("Server shut down gracefully")
 }

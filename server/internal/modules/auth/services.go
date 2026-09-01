@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
@@ -55,21 +56,29 @@ func (s *service) RegisterUser(req UserRegisterRequest) (*UserRegisterResponse, 
 		Password:               hashedPassword,
 		EmailVerificationToken: token,
 	}
+
+	// Render before committing the user so a deterministic template failure
+	// cannot create an account that has no usable verification email.
+	verifyURL := s.cfg.API_URL + "/auth/verify-email?token=" + token + "&email=" + req.Email
+	emailBody, err := email.RenderTemplate("verify_email.tmpl", map[string]string{
+		"Name":                  req.Name,
+		"EmailVerificationLink": verifyURL,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("render verification email: %w", err)
+	}
+
 	createdUser, err := s.repo.Create(user)
 	if err != nil {
 		return nil, err
 	}
 
-	verifyURL := s.cfg.API_URL + "/auth/verify-email?token=" + token + "&email=" + createdUser.Email
-	emailBody, err := email.RenderTemplate("verify_email.tmpl", map[string]string{
-		"Name":                  createdUser.Name,
-		"EmailVerificationLink": verifyURL,
-	})
-	if err != nil {
-		log.Println("Error rendering email template: ", err.Error())
+	if err := s.notify.SendEmail(context.Background(), createdUser.Email, "Verify your email", emailBody); err != nil {
+		// The user is already committed. Returning an error here would encourage
+		// a retry that can only fail with "email already exists". A transactional
+		// outbox is required to make this database write and event atomic.
+		log.Printf("Verification email was not queued for user %s: %v", createdUser.ID, err)
 	}
-
-	_ = s.notify.SendEmail(context.Background(), createdUser.Email, "Verify your email", emailBody)
 
 	return &UserRegisterResponse{
 		ID:    createdUser.ID.String(),
